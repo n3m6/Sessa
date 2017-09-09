@@ -11,5 +11,8 @@
     "trader"
   ],
   "author": "Abdulla Faraz",
-  "license": "SEE LICENSE IN LICENSE"
+  "license": "SEE LICENSE IN LICENSE",
+  "devDependencies": {
+    "mocha": "^3.5.0"
+  }
 }
