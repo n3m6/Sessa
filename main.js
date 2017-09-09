@@ -1,12 +1,12 @@
 const config = require('./config');
-const bitmexClient = require('bitmex-realtime-api');
+const BitmexClient = require('bitmex-realtime-api');
 
-const client = new bitmexClient({
+const client = new BitmexClient({
   testnet: true,
   apiKeyID: config.api.key,
   apiKeySecret: config.api.secret,
 });
 
 client.addStream('XBTUSD', 'instrument', (data, symbol, tableName) => {
-  console.log(`${symbol} ${data}`);
+  console.log(`${symbol} ${data} ${tableName}`);
 });
