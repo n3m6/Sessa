@@ -1,0 +1,15 @@
+{
+  "name": "sessa",
+  "version": "1.0.0",
+  "description": "crypto trader",
+  "main": "main.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "crypto",
+    "trader"
+  ],
+  "author": "Abdulla Faraz",
+  "license": "SEE LICENSE IN LICENSE"
+}
