@@ -4,7 +4,8 @@
   "description": "crypto trader",
   "main": "main.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "start": "node main.js"
   },
   "keywords": [
     "crypto",
