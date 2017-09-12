@@ -25,7 +25,7 @@ client.addStream('XBTUSD', 'trade', (data) => {
   const info = data[data.length - 1];
 
   const rsi = financial.roundTo(financial.rsi(data), 2);
-  const macd = financial.roundTo(financial.macd(data), 2);
+  const macd = financial.roundTo(financial.macd(data, 12, 26, 9), 2);
   const ema = financial.roundTo(financial.ema(9, data, prevEMA), 2);
   const ma = financial.roundTo(financial.ma(30, data), 2);
   const chop = financial.roundTo(financial.chop(data), 2);

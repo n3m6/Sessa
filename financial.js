@@ -60,22 +60,21 @@ function macdEMA(previousEMA, currentClose, range) {
 // MACD Moving average convergence divergence - for finding entry point
 Financial.prototype.macd = function macd(data, range1, range2, signalRange) {
   if (data.length === 1) {
-    const d = data[0];
+    const d = data[0].price;
     this.prev12ema = d;
     this.prev26ema = d;
     this.prevSignal = 0;
     return 1;
   }
 
-  const range1EMA = macdEMA(this.prev12ema, data[data.length - 1], range1);
-  const range2EMA = macdEMA(this.prev26ema, data[data.length - 1], range2);
+  const range1EMA = macdEMA(this.prev12ema, data[data.length - 1].price, range1);
+  const range2EMA = macdEMA(this.prev26ema, data[data.length - 1].price, range2);
   const macd = range1EMA - range2EMA;
   const signal = macdEMA(this.prevSignal, macd, signalRange);
   this.prev12ema = range1EMA;
   this.prev26ema = range2EMA;
   this.prevSignal = signal;
 
-  // console.log(`${data[data.length - 1]}\t\t${macd}\t${signal}\t${macd - signal}`);
   return macd - signal;
 };
 
