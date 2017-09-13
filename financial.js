@@ -6,6 +6,8 @@ const Financial = function Financial() {
   this.prevRSI = 0;
   this.prevRSIAverageGain = 0;
   this.prevRSIAverageLoss = 0;
+  this.prevTR = 0;
+  this.prevATR = 0;
 };
 
 function arraySlice(range, data) {
@@ -93,11 +95,6 @@ Financial.prototype.rsi = function rsi(data, range) {
   return this.prevRSI;
 };
 
-// Choppiness Indicator -- to avoid trading in ranges
-Financial.prototype.chop = function chop(data) {
-  return 1;
-};
-
 function macdEMA(previousEMA, currentClose, range) {
   const r = 2 / (range + 1);
   const curr = currentClose * r;
@@ -126,12 +123,71 @@ Financial.prototype.macd = function macd(data, range1, range2, signalRange) {
   return macdLine - signal;
 };
 
+function trueRange(curr, prev) {
+  const highLow = Math.abs(curr.high - curr.low);
+  const highPrevClose = Math.abs(curr.high - prev.close);
+  const LowPrevClose = Math.abs(curr.low - prev.close);
+  return Math.max(highLow, highPrevClose, LowPrevClose);
+}
+
+Financial.prototype.atr = function atr(data, range) {
+  if (data.length < range) {
+    const currentCandle = data[data.length - 1];
+    const tr = Math.abs(currentCandle.high - currentCandle.low);
+    const avgtr = tr;
+    this.prevTR = tr;
+    this.prevATR = avgtr;
+    return [tr, avgtr];
+  }
+  if (data.length === range) {
+    const currentCandle = data[data.length - 1];
+    const prevCandle = data[data.length - 2];
+    const tr = trueRange(currentCandle, prevCandle);
+    this.prevTR = tr;
+
+    const trMap = [];
+    for (let i = 0; i < data.length; i += 1) {
+      if (i === 0) {
+        const curr = data[i];
+        trMap.push(Math.abs(curr.high - curr.low));
+      } else {
+        const curr = data[i];
+        const prev = data[i - 1];
+        trMap.push(trueRange(curr, prev));
+      }
+    }
+    // console.log(JSON.stringify(trMap));
+    const totalTR = trMap.reduce((sum, val) => sum + val, 0);
+    const avgtr = totalTR / range;
+    this.prevATR = avgtr;
+    return [tr, avgtr];
+  }
+
+  const curr = data[data.length - 1];
+  const prev = data[data.length - 2];
+  const tr = trueRange(curr, prev);
+  const tmp = this.prevATR * (range - 1);
+  const avgtr = (tmp + tr) / range;
+
+  this.prevTR = tr;
+  this.prevATR = avgtr;
+
+  return [tr, avgtr];
+};
+
+// Choppiness Indicator -- to avoid trading in ranges
+// Choppiness indicator is incomplete
+// Financial.prototype.chop = function chop(data, range) {
+//  const [tr, atr] = this.atr(data, range);
+//  return atr;
+// };
+
 exports.Financial = new Financial();
 
 // test code
 /* const fin = new Financial();
 const prices = [];
-for (let i = 0; i < 200; i += 1) {
+for (let i = 0; i < 29; i += 1) {
   const open = fin.roundTo(randomizer(10, 30), 2);
   const high = fin.roundTo(randomizer(open + 1, open + 7), 2);
   const close = fin.roundTo(randomizer(10, 30), 2);
@@ -145,7 +201,7 @@ for (let i = 0; i < 200; i += 1) {
 }
 
 // Header
-console.log('Open\tClose\tAvgGain\tAvgLoss\tRSI');
+console.log('Open\tClose\tHigh\tLow\tATR');
 
 for (let i = 0; i < prices.length; i += 1) {
   let arr = [];
@@ -155,9 +211,6 @@ for (let i = 0; i < prices.length; i += 1) {
     arr = prices.slice(0, i + 1);
   }
   const currCandle = prices[i];
-  const arrRSI = fin.rsi(arr, 14);
-  console.log(`${currCandle.open}\t${currCandle.close}\t${fin.prevRSIAverageGain}\t${fin.prevRSIAverageLoss}\t${fin.roundTo(
-    arrRSI,
-    2,
-  )}`);
+  const chops = fin.chop(arr, 14);
+  console.log(`${currCandle.open}\t${currCandle.close}\t${currCandle.high}\t${currCandle.low}\t${chops}`);
 } */
