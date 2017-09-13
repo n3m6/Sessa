@@ -13,7 +13,7 @@ client.on('open', () => console.log('connection opened.'));
 client.on('close', () => console.log('connecttion closed.'));
 client.on('initialize', () => console.log('initialized, waiting for data'));
 
-console.log('#\tTimestamp\t\t\t\tClose\tVolume\tEMA\tMA\tRSI\tMACD');
+console.log('#\tTimestamp\t\t\tClose\tVolume\tEMA\tMA\tRSI\tMACD');
 
 client.addStream('XBTUSD', 'tradeBin1m', (data) => {
   const lastCandle = data[data.length - 1];
@@ -23,5 +23,5 @@ client.addStream('XBTUSD', 'tradeBin1m', (data) => {
   const ema = financial.roundTo(financial.ema(data, 9), 2);
   const sma = financial.roundTo(financial.sma(data, 30), 2);
 
-  console.log(`${data.length}\t${lastCandle.timestamp}\t\t${lastCandle.close}\t${lastCandle.volume}\t${ema}\t${sma}\t${rsi}\t${macd}`);
+  console.log(`${data.length}\t${lastCandle.timestamp}\t${lastCandle.close}\t${lastCandle.volume}\t${ema}\t${sma}\t${rsi}\t${macd}`);
 });
