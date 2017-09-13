@@ -69,13 +69,13 @@ Financial.prototype.macd = function macd(data, range1, range2, signalRange) {
 
   const range1EMA = macdEMA(this.prev12ema, data[data.length - 1].price, range1);
   const range2EMA = macdEMA(this.prev26ema, data[data.length - 1].price, range2);
-  const macd = range1EMA - range2EMA;
+  const macdLine = range1EMA - range2EMA;
   const signal = macdEMA(this.prevSignal, macd, signalRange);
   this.prev12ema = range1EMA;
   this.prev26ema = range2EMA;
   this.prevSignal = signal;
 
-  return macd - signal;
+  return macdLine - signal;
 };
 
 exports.Financial = new Financial();
