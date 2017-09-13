@@ -37,7 +37,7 @@ Financial.prototype.ma = function ma(range, data) {
 
 Financial.prototype.ema = function ema(range, data, prev) {
   const multiplier = 2 / (range + 1);
-  const close = data[data.length - 1].close; // change to close later
+  const close = data[data.length - 1].close; // eslint-disable-line
   const prem = (close - prev) * multiplier;
 
   return prem + prev;
@@ -68,6 +68,7 @@ Financial.prototype.rsi = function rsi(data, range) {
     const iRS = 100 / (1 + RS);
 
     this.prevRSI = 100 - iRS;
+
     return this.prevRSI;
   }
 
@@ -130,7 +131,7 @@ exports.Financial = new Financial();
 // test code
 /* const fin = new Financial();
 const prices = [];
-for (let i = 0; i < 4000; i += 1) {
+for (let i = 0; i < 200; i += 1) {
   const open = fin.roundTo(randomizer(10, 30), 2);
   const high = fin.roundTo(randomizer(open + 1, open + 7), 2);
   const close = fin.roundTo(randomizer(10, 30), 2);
@@ -142,7 +143,9 @@ for (let i = 0; i < 4000; i += 1) {
     close,
   });
 }
-// console.log(`Full${JSON.stringify(prices)}`);
+
+// Header
+console.log('Open\tClose\tAvgGain\tAvgLoss\tRSI');
 
 for (let i = 0; i < prices.length; i += 1) {
   let arr = [];
@@ -151,7 +154,10 @@ for (let i = 0; i < prices.length; i += 1) {
   } else {
     arr = prices.slice(0, i + 1);
   }
-  // console.log(JSON.stringify(arr));
+  const currCandle = prices[i];
   const arrRSI = fin.rsi(arr, 14);
-  // console.log(arrRSI);
+  console.log(`${currCandle.open}\t${currCandle.close}\t${fin.prevRSIAverageGain}\t${fin.prevRSIAverageLoss}\t${fin.roundTo(
+    arrRSI,
+    2,
+  )}`);
 } */
