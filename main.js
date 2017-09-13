@@ -17,14 +17,14 @@ client.on('initialize', () => console.log('initialized, waiting for data'));
 
 console.log('#\tTimestamp\t\t\t\tClose\tVolume\tEMA\tMA\tRSI\tMACD\tChop');
 
-client.addStream('XBTUSD', 'trade', (data) => {
+client.addStream('XBTUSD', 'tradeBin1m', (data) => {
   if (data.length === 1) {
-    prevEMA = data[0].price;
+    prevEMA = data[0].close;
   }
 
   const info = data[data.length - 1];
 
-  const rsi = financial.roundTo(financial.rsi(data), 2);
+  const rsi = financial.roundTo(financial.rsi(data, 14), 2);
   const macd = financial.roundTo(financial.macd(data, 12, 26, 9), 2);
   const ema = financial.roundTo(financial.ema(9, data, prevEMA), 2);
   const ma = financial.roundTo(financial.ma(30, data), 2);
@@ -32,5 +32,5 @@ client.addStream('XBTUSD', 'trade', (data) => {
 
   prevEMA = ema;
   // console.log(JSON.stringify(data));
-  console.log(`${data.length}\t${info.timestamp}\t\t${info.price}\t${info.size}\t${ema}\t${ma}\t${rsi}\t${macd}\t${chop}`);
+  console.log(`${data.length}\t${info.timestamp}\t\t${info.close}\t${info.volume}\t${ema}\t${ma}\t${rsi}\t${macd}\t${chop}`);
 });
