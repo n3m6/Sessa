@@ -8,6 +8,7 @@ const Financial = function Financial() {
   this.prevRSIAverageLoss = 0;
   this.prevTR = 0;
   this.prevATR = 0;
+  this.prevEMA = 0;
 };
 
 function arraySlice(range, data) {
@@ -30,19 +31,24 @@ Financial.prototype.roundTo = function roundTo(n, digits) {
   return +test.toFixed(dig);
 };
 
-Financial.prototype.ma = function ma(range, data) {
+Financial.prototype.sma = function sma(data, range) {
   const as = arraySlice(range, data);
   const total = as.reduce((sum, value) => sum + value.close, 0);
 
   return total / as.length;
 };
 
-Financial.prototype.ema = function ema(range, data, prev) {
-  const multiplier = 2 / (range + 1);
+Financial.prototype.ema = function ema(data, range) {
+  if (data.length === 1) {
+    this.prevEMA = data[data.length - 1].close;
+    return this.prevEMA;
+  }
+  const coefficient = 2 / (range + 1);
   const close = data[data.length - 1].close; // eslint-disable-line
-  const prem = (close - prev) * multiplier;
+  const tmp = (close - this.prevEMA) * coefficient;
 
-  return prem + prev;
+  this.prevEMA = tmp + this.prevEMA;
+  return this.prevEMA;
 };
 
 // Relative Strength Index for measuring momentum of trend
@@ -212,5 +218,5 @@ for (let i = 0; i < prices.length; i += 1) {
   }
   const currCandle = prices[i];
   const chops = fin.chop(arr, 14);
-  console.log(`${currCandle.open}\t${currCandle.close}\t${currCandle.high}\t${currCandle.low}\t${chops}`);
+  console.log(`${currCandle.open}\t${currCandle.close}`);
 } */
