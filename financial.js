@@ -1,4 +1,5 @@
-// TODO: change all "price" to "close"
+const utils = require('./utils.js');
+
 const Financial = function Financial() {
   this.prev12ema = 0;
   this.prev26ema = 0;
@@ -11,28 +12,8 @@ const Financial = function Financial() {
   this.prevEMA = 0;
 };
 
-function arraySlice(range, data) {
-  return data.slice(data.length > range ? data.length - range : 0);
-}
-
-function randomizer(min, max) {
-  return (rand = Math.random() * (max - min + 1) + min); //eslint-disable-line
-}
-
-Financial.prototype.roundTo = function roundTo(n, digits) {
-  let dig = 0;
-  if (digits !== undefined) {
-    dig = digits;
-  }
-
-  const multiplicator = dig ** 10;
-  const no = parseFloat((n * multiplicator).toFixed(11));
-  const test = Math.round(no) / multiplicator;
-  return +test.toFixed(dig);
-};
-
 Financial.prototype.sma = function sma(data, range) {
-  const as = arraySlice(range, data);
+  const as = utils.arraySlice(range, data);
   const total = as.reduce((sum, value) => sum + value.close, 0);
 
   return total / as.length;
@@ -56,7 +37,7 @@ Financial.prototype.rsi = function rsi(data, range) {
   if (data.length < range) return 1; // ignore first part
 
   if (data.length === range) {
-    const candles = arraySlice(range, data);
+    const candles = utils.arraySlice(range, data);
     const gains = candles.filter(elem => elem.close > elem.open);
     let totalGains = 0;
     for (let i = 0; i < gains.length; i += 1) {
