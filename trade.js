@@ -9,12 +9,24 @@ Trade.prototype.threeGreenEnter = function threeGreenEnter(close, sma, macd, rsi
   const rsiHigh = 60;
   const rsiLow = 40;
 
-  if (sma > close && macd < 0 && rsi < rsiLow) return true;
-  if (sma < close && macd > 0 && rsi > rsiHigh) return true;
-  return false;
+  if (sma > close && macd < 0 && rsi < rsiLow) {
+    return [true, 'SHORT'];
+  }
+  if (sma < close && macd > 0 && rsi > rsiHigh) {
+    return [true, 'LONG'];
+  }
+  return [false, ''];
 };
 
 Trade.prototype.threeGreenExit = function threeGreenExit(close, sma, position) {
+  if (position.orderType === 'LONG') {
+    if (close < sma) return true;
+    return false;
+  }
+  if (position.orderType === 'SHORT') {
+    if (close > sma) return true;
+    return false;
+  }
   return false;
 };
 
@@ -23,14 +35,35 @@ exports.Trade = new Trade();
 // TEST CODE BELOW
 // FIXME: remove test code after testing
 
+const positions = {
+  XBTUSD: {
+    activeTrade: false, // is there an active trade with this currency
+    orderType: '', // long or short
+    contracts: 0, // number of contracts bought
+    value: 0, // total value of contracts in play
+  },
+};
+
 const trade = new Trade();
 const prices = [];
 
-for (let i = 0; i < 29; i += 1) {
-  const open = utils.roundTo(utils.randomizer(10, 30), 2);
-  const high = utils.roundTo(utils.randomizer(open + 1, open + 7), 2);
-  const close = utils.roundTo(utils.randomizer(10, 30), 2);
-  const low = utils.roundTo(utils.randomizer(close - 7, close - 1), 2);
+for (let i = 0; i < 200; i += 1) {
+  let open = 0;
+  let close = 0;
+  let high = 0;
+  let low = 0;
+
+  if (i === 0) {
+    open = Math.abs(utils.roundTo(utils.randomizer(10, 30), 2));
+    high = Math.abs(utils.roundTo(utils.randomizer(open + 1, open + 7), 2));
+    low = Math.abs(utils.roundTo(utils.randomizer(close - 7, close - 1), 2));
+    close = Math.abs(utils.roundTo(utils.randomizer(high, low), 2));
+  } else {
+    open = prices[i - 1].close;
+    high = Math.abs(utils.roundTo(utils.randomizer(open + 1, open + 7), 2));
+    low = Math.abs(utils.roundTo(utils.randomizer(close - 7, close - 1), 2));
+    close = Math.abs(utils.roundTo(utils.randomizer(high, low), 2));
+  }
   prices.push({
     open,
     high,
@@ -40,7 +73,7 @@ for (let i = 0; i < 29; i += 1) {
 }
 
 // Header
-console.log('Open\tClose\tSMA\tMACD\tRSI');
+console.log('#\tOpen\tClose\tSMA\tMACD\tRSI\tPstn\tType');
 
 for (let i = 0; i < prices.length; i += 1) {
   let arr = [];
@@ -55,5 +88,22 @@ for (let i = 0; i < prices.length; i += 1) {
   const macd = utils.roundTo(fin.macd(arr, 12, 26, 9), 2);
   const sma = utils.roundTo(fin.sma(arr, 20), 2);
 
-  console.log(`${currCandle.open}\t${currCandle.close}\t${sma}\t${macd}\t${rsi}`);
+  if (positions.XBTUSD.activeTrade) {
+    // if there's an active trade check wither we should sell it now
+    if (trade.threeGreenExit(currCandle.close, sma, positions.XBTUSD)) {
+      positions.XBTUSD.activeTrade = false;
+      positions.XBTUSD.orderType = '';
+    }
+  } else {
+    // check whether we should enter a trade
+    [positions.XBTUSD.activeTrade, positions.XBTUSD.orderType] = trade.threeGreenEnter(
+      currCandle.close,
+      sma,
+      macd,
+      rsi,
+    );
+  }
+
+  console.log(`${i}\t${currCandle.open}\t${currCandle.close}\t${sma}\t${macd}\t${rsi}\t${positions.XBTUSD
+    .activeTrade}\t${positions.XBTUSD.orderType}`);
 }
