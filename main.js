@@ -31,10 +31,25 @@ client.addStream('XBTUSD', 'tradeBin1m', (data) => {
 
   if (positions.XBTUSD.activeTrade) {
     // if there's an active trade check wither we should sell it now
-    positions.XBTUSD.activeTrade = trade.threeGreenExit(lastCandle.close, sma, positions.XBTUSD);
+    if (trade.threeGreenExit(lastCandle.close, sma, positions.XBTUSD)) {
+      positions.XBTUSD.activeTrade = false;
+      positions.XBTUSD.orderType = '';
+
+      // Stop the actual transaction
+      trade.stopOrder(positions.XBTUSD);
+    }
   } else {
     // check whether we should enter a trade
-    positions.XBTUSD.activeTrade = trade.threeGreenEnter(lastCandle.close, sma, macd, rsi);
+    [positions.XBTUSD.activeTrade, positions.XBTUSD.orderType] = trade.threeGreenEnter(
+      lastCandle.close,
+      sma,
+      macd,
+      rsi,
+    );
+    if (positions.XBTUSD.activeTrade) {
+      // if an order needs to place, place it here
+      trade.placeOrder(positions.XBTUSD.orderType);
+    }
   }
 
   console.log(`${data.length}\t${lastCandle.timestamp}\t${lastCandle.close}\t${lastCandle.volume}\t${ema}\t${sma}\t${rsi}\t${macd}\t${positions

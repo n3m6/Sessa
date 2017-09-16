@@ -25,9 +25,20 @@ Trade.prototype.threeGreenExit = function threeGreenExit(close, sma, position) {
   }
   if (position.orderType === 'SHORT') {
     if (close > sma) return true;
+
     return false;
   }
   return false;
+};
+
+Trade.prototype.placeOrder = function placeOrder(orderType) {
+  // console.log(`order placed ${orderType}`);
+  return true;
+};
+
+Trade.prototype.stopOrder = function stopOrder(position) {
+  // console.log(`completed transaction ${position.orderType}`);
+  return true;
 };
 
 exports.Trade = new Trade();
@@ -35,7 +46,7 @@ exports.Trade = new Trade();
 // TEST CODE BELOW
 // FIXME: remove test code after testing
 
-const positions = {
+/* const positions = {
   XBTUSD: {
     activeTrade: false, // is there an active trade with this currency
     orderType: '', // long or short
@@ -47,7 +58,7 @@ const positions = {
 const trade = new Trade();
 const prices = [];
 
-for (let i = 0; i < 200; i += 1) {
+for (let i = 0; i < 500; i += 1) {
   let open = 0;
   let close = 0;
   let high = 0;
@@ -93,6 +104,9 @@ for (let i = 0; i < prices.length; i += 1) {
     if (trade.threeGreenExit(currCandle.close, sma, positions.XBTUSD)) {
       positions.XBTUSD.activeTrade = false;
       positions.XBTUSD.orderType = '';
+
+      // Stop the actual transaction
+      trade.stopOrder(positions.XBTUSD);
     }
   } else {
     // check whether we should enter a trade
@@ -102,8 +116,12 @@ for (let i = 0; i < prices.length; i += 1) {
       macd,
       rsi,
     );
+    if (positions.XBTUSD.activeTrade) {
+      // if an order needs to place, place it here
+      trade.placeOrder(positions.XBTUSD.orderType);
+    }
   }
 
   console.log(`${i}\t${currCandle.open}\t${currCandle.close}\t${sma}\t${macd}\t${rsi}\t${positions.XBTUSD
     .activeTrade}\t${positions.XBTUSD.orderType}`);
-}
+} */
