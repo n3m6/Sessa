@@ -1,7 +1,3 @@
-const utils = require('./utils.js');
-const fin = require('./financial').Financial; // for testing only
-const strategy = require('./strategy').Strategy;
-
 const Trade = function Trade() {};
 
 Trade.prototype.placeOrder = function placeOrder(orderType) {
