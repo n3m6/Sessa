@@ -7,6 +7,8 @@ const strategy = require('./strategy').Strategy;
 const Engine = function Engine() {};
 
 Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
+  // ignore 1st 30 rows and let the data aggregate
+
   const lastCandle = data[data.length - 1];
 
   const rsi = utils.roundTo(financial.rsi(data, 14), 2);
@@ -20,9 +22,10 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
       positions.XBTUSD.orderType = '';
 
       // Stop the actual transaction
-      trade.stopOrder(positions.XBTUSD);
+      positions.XBTUSD.orderID = trade.stopOrder(positions.XBTUSD);
     }
-  } else {
+  } else if (data.length > 16) {
+    // ignore the first few rows and let the data aggregate
     // check whether we should enter a trade
     [positions.XBTUSD.activeTrade, positions.XBTUSD.orderType] = strategy.threeGreenEnter(
       lastCandle.close,
@@ -30,6 +33,7 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
       macd,
       rsi,
     );
+
     if (positions.XBTUSD.activeTrade) {
       // if an order needs to place, place it here
       trade.placeOrder(positions.XBTUSD.orderType);
