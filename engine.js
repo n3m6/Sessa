@@ -22,6 +22,8 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
       positions.XBTUSD.orderType = '';
 
       // Stop the actual transaction
+
+      // FIXME stop order should be an async call
       positions.XBTUSD.orderID = trade.stopOrder(positions.XBTUSD);
     }
   } else if (data.length > 16) {
@@ -36,6 +38,7 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
 
     if (positions.XBTUSD.activeTrade) {
       // if an order needs to place, place it here
+      // FIXME place order should be an async clal
       trade.placeOrder(positions.XBTUSD.orderType);
     }
   }
