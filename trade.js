@@ -18,75 +18,90 @@ console.log(JSON.stringify(response));
 
 // FIXME: this is an async function change it to
 // handle things in an async fashion
-Trade.prototype.getBalance = function getBalance() {
-  const verb = 'GET';
-  const path = '/api/v1/user/wallet';
-  const expires = Date.now() + 60000;
 
-  const signature = crypto
-    .createHmac('sha256', config.api.secret)
-    .update(verb + path + expires)
-    .digest('hex');
+Trade.prototype.getBitMexBalance = function getBitMexBalance() {
+  return new Promise((resolve, reject) => {
+    const verb = 'GET';
+    const path = '/api/v1/user/wallet';
+    const expires = Date.now() + 60000;
 
-  const headers = {
-    'content-type': 'application/json',
-    Accept: 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-    'api-expires': expires,
-    'api-key': config.api.key,
-    'api-signature': signature,
-  };
+    const signature = crypto
+      .createHmac('sha256', config.api.secret)
+      .update(verb + path + expires)
+      .digest('hex');
 
-  const request = unirest.get(config.api.resthost + path);
-  request.header(headers).end((response) => {
-    console.log(`Currency ${response.body.currency}`);
-    console.log(`Balance ${response.body.amount / 100000000}`);
+    const headers = {
+      'content-type': 'application/json',
+      Accept: 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'api-expires': expires,
+      'api-key': config.api.key,
+      'api-signature': signature,
+    };
+
+    const request = unirest.get(config.api.resthost + path);
+    request.header(headers).end((response) => {
+      if (response.code === 200) return resolve(response.body.amount);
+      return reject(response);
+    });
   });
 };
 
-function determineOrderQuantity(margin, betSize, balance) {
-  const bet = balance * betSize;
-  return margin * bet;
-}
+Trade.prototype.determineOrderQty = function determineOrderQty(price, balance) {
+  return new Promise((resolve, reject) => {
+    const toXBT = balance / 100000000;
+    const dollarValue = price * toXBT;
+    const bet = Math.round(dollarValue * config.margin * config.betSize);
+    if (price === 0 || balance < 1) return reject();
+    return resolve(bet);
+  });
+};
 
-Trade.prototype.placeOrder = function placeOrder(orderType) {
-  // console.log(`order placed ${orderType}`);
+Trade.prototype.bitMexMarketOrder = function bitMeMarketxOrder(side, orderQty) {
+  return new Promise((resolve, reject) => {
+    const verb = 'POST';
+    const path = '/api/v1/order';
+    const expires = Date.now() + 60000;
+    const data = {
+      symbol: 'XBTUSD',
+      side,
+      orderQty,
+      ordType: 'Market',
+      timeInForce: 'ImmediateOrCancel',
+    };
+    const postBody = JSON.stringify(data);
+    const signature = crypto
+      .createHmac('sha256', config.api.secret)
+      .update(verb + path + expires + postBody)
+      .digest('hex');
 
-  const orderQty = determineOrderQuantity(config.margin, config.betSize, this.getBalance);
-  // POST testing
+    const headers = {
+      'content-type': 'application/json',
+      Accept: 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'api-expires': expires,
+      'api-key': config.api.key,
+      'api-signature': signature,
+    };
 
-  const verb = 'POST';
-  const path = '/api/v1/order';
-  const expires = Date.now() + 60000;
-  const data = {
-    symbol: 'XBTUSD',
-    side: 'Buy',
-    orderQty,
-    ordType: 'Market',
-    timeInForce: 'ImmediateOrCancel',
-  };
-  const postBody = JSON.stringify(data);
-  const signature = crypto
-    .createHmac('sha256', config.api.secret)
-    .update(verb + path + expires + postBody)
-    .digest('hex');
+    const request = unirest.post(config.api.resthost + path);
+    request
+      .header(headers)
+      .send(postBody)
+      .end((response) => {
+        if (response.code === 200) return resolve(response);
+        return reject(response);
+      });
+  });
+};
 
-  const headers = {
-    'content-type': 'application/json',
-    Accept: 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-    'api-expires': expires,
-    'api-key': config.api.key,
-    'api-signature': signature,
-  };
-
-  const request = unirest.post(config.api.resthost + path);
-  request
-    .header(headers)
-    .send(postBody)
-    .end((response) => {
-      console.log(JSON.stringify(response));
-    });
+Trade.prototype.placeOrder = function placeOrder(orderType, currentPrice) {
+  const side = orderType === 'BUY' ? 'Buy' : 'Sell';
+  this.getBitMexBalance()
+    .then(balance => this.determineOrderQty(currentPrice, balance))
+    .then(orderSize => this.bitMexMarketOrder(side, orderSize))
+    .then(response => console.log(JSON.stringify(response.body)))
+    .catch(error => console.error(`error ${error}`));
 
   return true;
 };
@@ -99,7 +114,10 @@ Trade.prototype.stopOrder = function stopOrder(position) {
 exports.Trade = new Trade();
 
 const trade = new Trade();
-trade.getBalance();
+const currentXBTUSDValue = 3784;
+const side = 'Sell';
+
+// Test adjusting the margin
 
 // TEST CODE BELOW
 // FIXME: remove test code after testing
