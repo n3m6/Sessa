@@ -6,6 +6,10 @@ const strategy = require('./strategy').Strategy;
 
 const Engine = function Engine() {};
 
+Engine.prototype.init = function init() {
+  trade.init();
+};
+
 Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
   // ignore 1st 30 rows and let the data aggregate
 
@@ -24,7 +28,7 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
       // Stop the actual transaction
 
       // FIXME stop order should be an async call
-      positions.XBTUSD.orderID = trade.stopOrder(positions.XBTUSD);
+      trade.openPosition(positions.XBTUSD);
     }
   } else if (data.length > 16) {
     // ignore the first few rows and let the data aggregate
@@ -39,7 +43,7 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
     if (positions.XBTUSD.activeTrade) {
       // if an order needs to place, place it here
       // FIXME place order should be an async clal
-      trade.placeOrder(positions.XBTUSD.orderType);
+      trade.closePosition(positions.XBTUSD.orderType);
     }
   }
 
