@@ -1,6 +1,7 @@
 const config = require('./config');
 const unirest = require('unirest');
 const crypto = require('crypto');
+const positions = require('./models');
 
 const Trade = function Trade() {};
 
@@ -92,6 +93,10 @@ Trade.prototype.bitMexAdjustMargin = function bitMexAdjustMargin(margin) {
   });
 };
 
+Trade.prototype.init = function init() {
+  // this.bitMexAdjustMargin(config.margin);
+};
+
 Trade.prototype.bitMexMarketOrder = function bitMeMarketxOrder(side, orderQty) {
   return new Promise((resolve, reject) => {
     const verb = 'POST';
@@ -130,8 +135,8 @@ Trade.prototype.bitMexMarketOrder = function bitMeMarketxOrder(side, orderQty) {
   });
 };
 
-Trade.prototype.placeOrder = function placeOrder(orderType, currentPrice) {
-  const side = orderType === 'BUY' ? 'Buy' : 'Sell';
+Trade.prototype.openPosition = function openPosition(orderType, currentPrice) {
+  const side = orderType === 'LONG' ? 'Buy' : 'Sell';
   this.getBitMexBalance()
     .then(balance => this.determineOrderQty(currentPrice, balance))
     .then(orderSize => this.bitMexMarketOrder(side, orderSize))
@@ -144,20 +149,57 @@ Trade.prototype.placeOrder = function placeOrder(orderType, currentPrice) {
   return true;
 };
 
-Trade.prototype.stopOrder = function stopOrder(position) {
+Trade.prototype.bitMexClosePosition = function bitMexClosePosition(orderId) {
+  const verb = 'POST';
+  const path = '/api/v1/order';
+  const expires = Date.now() + 60000;
+  const data = {
+    orderID: orderId,
+    symbol: 'XBTUSD',
+    execInst: 'Close',
+  };
+  const postBody = JSON.stringify(data);
+  const signature = crypto
+    .createHmac('sha256', config.api.secret)
+    .update(verb + path + expires + postBody)
+    .digest('hex');
+
+  const headers = {
+    'content-type': 'application/json',
+    Accept: 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    'api-expires': expires,
+    'api-key': config.api.key,
+    'api-signature': signature,
+  };
+
+  const request = unirest.post(config.api.resthost + path);
+  request
+    .header(headers)
+    .send(postBody)
+    .end((response) => {
+      if (response.code === 200) {
+        console.log(response.body);
+        // return resolve(response);
+      } else {
+        console.log(`error: ${JSON.stringify(response.body)}`);
+      }
+      // return reject(response);
+    });
+};
+
+Trade.prototype.closePosition = function closePosition(position) {
   // console.log(`completed transaction ${position.orderType}`);
-  return true;
+  this.bitMexClosePosition(position.orderID);
 };
 
 exports.Trade = new Trade();
 
-const trade = new Trade();
-trade
-  .bitMexAdjustMargin(config.margin)
-  .then(console.log)
-  .catch(console.error);
-
 // Test adjusting the margin
+/* trade
+.bitMexAdjustMargin(config.margin)
+.then(console.log)
+.catch(console.error); */
 
 // TEST CODE BELOW
 // FIXME: remove test code after testing
