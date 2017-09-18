@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "bitmex-realtime-api": "^0.2.3",
+    "redis": "^2.8.0",
     "unirest": "^0.5.1",
     "ws": "^3.1.0"
   }
