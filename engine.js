@@ -1,8 +1,12 @@
-const positions = require('./models');
+// const positions = require('./models'); // use redis db instead
 const utils = require('./utils.js');
 const financial = require('./financial').Financial;
 const trade = require('./trade').Trade;
 const strategy = require('./strategy').Strategy;
+const db = require('./db').Db;
+
+// FIXME: ENGINE IS BROKEN
+// IT NEEDS REWORKING TO WORK WITH REDIS
 
 const Engine = function Engine() {};
 
@@ -19,7 +23,9 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
   const macd = utils.roundTo(financial.macd(data, 12, 26, 9), 2);
   const sma = utils.roundTo(financial.sma(data, 20), 2);
 
-  if (positions.XBTUSD.activeTrade) {
+  // FIXME THIS PART DOESNT WORK
+
+  /*  if (positions.XBTUSD.activeTrade) {
     // if there's an active trade check wither we should sell it now
     if (strategy.threeGreenExit(lastCandle.close, sma, positions.XBTUSD)) {
       positions.XBTUSD.activeTrade = false;
@@ -45,7 +51,7 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
       // FIXME place order should be an async clal
       trade.closePosition(positions.XBTUSD.orderType);
     }
-  }
+  } */
 
   console.log(`${data.length}\t${lastCandle.timestamp}\t${lastCandle.close}\t${lastCandle.volume}\t${sma}\t${rsi}\t${macd}\t${positions
     .XBTUSD.activeTrade}\t${positions.XBTUSD.orderType}`);
