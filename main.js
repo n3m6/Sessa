@@ -11,5 +11,5 @@ client.on('initialize', () => console.log('initialized, waiting for data'));
 
 engine.init();
 
-console.log('#\tTimestamp\t\t\tClose\tVolume\tMA\tRSI\tMACD\tPstn\tType');
+console.log('#\tTimestamp\t\t\tClose\tVolume\tMA\tRSI\tMACD');
 client.addStream('XBTUSD', 'tradeBin1m', data => engine.oneMinuteProcessing(data));

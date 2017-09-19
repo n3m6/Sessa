@@ -1,5 +1,9 @@
 const client = require('./dbconnection');
 
+client.on('error', (err) => {
+  console.log(`DB Error. Is DB available? ${err}`);
+});
+
 /*
 for positions:
 key     field       value

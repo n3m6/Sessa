@@ -4,9 +4,6 @@ const crypto = require('crypto');
 
 const Trade = function Trade() {};
 
-// FIXME: this is an async function change it to
-// handle things in an async fashion
-
 Trade.prototype.getBitMexBalance = function getBitMexBalance() {
   return new Promise((resolve, reject) => {
     const verb = 'GET';
@@ -122,18 +119,14 @@ Trade.prototype.bitMexMarketOrder = function bitMeMarketxOrder(side, orderQty) {
   });
 };
 
-Trade.prototype.openPosition = function openPosition(orderType, currentPrice) {
+Trade.prototype.openPosition = function openPosition(orderType, currentPrice, callback) {
   const side = orderType === 'LONG' ? 'Buy' : 'Sell';
   this.getBitMexBalance()
     .then(balance => this.determineOrderQty(currentPrice, balance))
     .then(orderSize => this.bitMexMarketOrder(side, orderSize))
     // FIXME remove these console logs
-    .then(response => console.log(JSON.stringify(response.body)))
+    .then(response => callback(response))
     .catch(error => console.error(`error ${error}`));
-
-  // FIXME fix this return it, it should return more information
-  // and it should add those inforation to the position model
-  return true;
 };
 
 Trade.prototype.bitMexClosePosition = function bitMexClosePosition(orderId) {
@@ -166,18 +159,22 @@ Trade.prototype.bitMexClosePosition = function bitMexClosePosition(orderId) {
     .send(postBody)
     .end((response) => {
       if (response.code === 200) {
-        console.log(response.body);
+        // console.log(response.body);
         // return resolve(response);
+        // FIXME this could be better
+        console.log('position closed');
       } else {
-        console.log(`error: ${JSON.stringify(response.body)}`);
+        console.log('position could not be closed');
       }
+      // console.log(`error: ${JSON.stringify(response.body)}`);
       // return reject(response);
     });
 };
 
-Trade.prototype.closePosition = function closePosition(position) {
+// FIXME change this to a promise function
+Trade.prototype.closePosition = function closePosition(orderID) {
   // console.log(`completed transaction ${position.orderType}`);
-  this.bitMexClosePosition(position.orderID);
+  this.bitMexClosePosition(orderID);
 };
 
 exports.Trade = new Trade();

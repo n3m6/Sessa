@@ -15,12 +15,12 @@ Strategy.prototype.threeGreenEnter = function threeGreenEnter(close, sma, macd, 
   return [false, ''];
 };
 
-Strategy.prototype.threeGreenExit = function threeGreenExit(close, sma, position) {
-  if (position.orderType === 'LONG') {
+Strategy.prototype.threeGreenExit = function threeGreenExit(close, sma, orderType) {
+  if (orderType === 'LONG') {
     if (close < sma) return true;
     return false;
   }
-  if (position.orderType === 'SHORT') {
+  if (orderType === 'SHORT') {
     if (close > sma) return true;
 
     return false;
