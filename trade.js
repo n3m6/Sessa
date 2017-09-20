@@ -81,7 +81,7 @@ Trade.prototype.init = function init() {
   // this.bitMexAdjustMargin(config.margin);
 };
 
-Trade.prototype.bitMexMarketOrder = function bitMeMarketxOrder(side, orderQty) {
+Trade.prototype.bitMexMarketOrder = function bitMexMarketOrder(side, orderQty) {
   return new Promise((resolve, reject) => {
     const verb = 'POST';
     const path = '/api/v1/order';
