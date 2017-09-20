@@ -171,10 +171,62 @@ Trade.prototype.bitMexClosePosition = function bitMexClosePosition(orderId) {
     });
 };
 
+Trade.prototype.bitMexSetStopLoss = function bitMexSetStopLoss(orderId, stopPrice) {
+  const verb = 'POST';
+  const path = '/api/v1/order';
+  const expires = Date.now() + 60000;
+  const data = {
+    orderID: orderId,
+    symbol: 'XBTUSD',
+    ordType: 'Stop',
+    stopPx: stopPrice,
+    execInst: 'Close, LastPrice',
+  };
+  const postBody = JSON.stringify(data);
+  const signature = crypto
+    .createHmac('sha256', config.api.secret)
+    .update(verb + path + expires + postBody)
+    .digest('hex');
+
+  const headers = {
+    'content-type': 'application/json',
+    Accept: 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    'api-expires': expires,
+    'api-key': config.api.key,
+    'api-signature': signature,
+  };
+
+  const request = unirest.post(config.api.resthost + path);
+  request
+    .header(headers)
+    .send(postBody)
+    .end((response) => {
+      if (response.code === 200) {
+        // console.log(response.body);
+        // return resolve(response);
+        // FIXME this could be better
+        console.log('stop loss set');
+      } else {
+        console.log(`could not set stop loss for position${JSON.stringify(response)}`);
+      }
+      // console.log(`error: ${JSON.stringify(response.body)}`);
+      // return reject(response);
+    });
+};
+
 // FIXME change this to a promise function
 Trade.prototype.closePosition = function closePosition(orderID) {
   // console.log(`completed transaction ${position.orderType}`);
   this.bitMexClosePosition(orderID);
 };
 
+Trade.prototype.setStopLoss = function setStopLoss(orderID, stopPrice) {
+  //
+  this.bitMexSetStopLoss(orderID, stopPrice);
+};
+
 exports.Trade = new Trade();
+
+// const tr = new Trade();
+// tr.openPosition('LONG', 3935, tr.);

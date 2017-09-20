@@ -28,8 +28,6 @@ Engine.prototype.setOrderID = function setOrderID(response) {
 };
 
 Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
-  // ignore 1st 30 rows and let the data aggregate
-
   const lastCandle = data[data.length - 1];
 
   const rsi = utils.roundTo(financial.rsi(data, 14), 2);

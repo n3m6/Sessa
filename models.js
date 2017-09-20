@@ -1,4 +1,4 @@
-const positions = {
+/* const positions = {
   XBTUSD: {
     activeTrade: false, // is there an active trade with this curr/commodity
     exchange: 'BitMEX',
@@ -9,4 +9,6 @@ const positions = {
   },
 };
 
-module.exports = positions;
+module.exports = positions; */
+
+// FIXME remove this file as this has been moved to the db
