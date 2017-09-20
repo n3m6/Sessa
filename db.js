@@ -71,36 +71,3 @@ Db.prototype.setOrderType = function setOrderType(orderType) {
 };
 
 exports.Db = new Db();
-
-// Test code
-/* const db = new Db();
-db
-  .getActiveTrade()
-  .then(reply => console.log(`active trade: ${reply}`))
-  .catch(reply => console.error(`error getting active trade${reply}`));
-
-db
-  .setActiveTrade('true')
-  .then(reply => console.log(`set active trade to true${reply}`))
-  .catch(reply => console.error(`error setting active trade${reply}`));
-
-db
-  .setOrderID('101')
-  .then(reply => console.log(`set order id to 101${reply}`))
-  .catch(reply => console.error(`error setting id ${reply}`));
-
-db
-  .getOrderID()
-  .then(reply => console.log(`id received ${reply}`))
-  .catch(reply => console.error(`error setting id ${reply}`));
-
-db
-  .setOrderType('LONG')
-  .then(reply => console.log(`set order type to buy${reply}`))
-  .catch(reply => console.error(`error setting order type to buy${reply}`));
-
-db
-  .getOrderType()
-  .then(reply => console.log(`get order type${reply}`))
-  .catch(reply => console.error(`error getting order type${reply}`));
-*/

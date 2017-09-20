@@ -11,6 +11,12 @@ Engine.prototype.init = function init() {
   // TODO
   // 1. if redis essential values don't exist create them
   // 2. check if there are any open orders, and do what's necessary
+  db
+    .setActiveTrade('false')
+    .then(db.setOrderID(''))
+    .then(db.setOrderType(''))
+    .catch(reply => console.error(`Error while initializing db values ${reply}`));
+
   trade.init();
 };
 
