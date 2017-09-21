@@ -125,7 +125,7 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, ca
     .then(balance => this.determineOrderQty(currentPrice, balance))
     .then(orderSize => this.bitMexMarketOrder(side, orderSize))
     // FIXME remove these console logs
-    .then(response => callback(response))
+    .then(response => callback(response.body.orderID)) // make it return an array here
     .catch(error => console.error(`error ${error}`));
 };
 
@@ -221,12 +221,28 @@ Trade.prototype.closePosition = function closePosition(orderID) {
   this.bitMexClosePosition(orderID);
 };
 
-Trade.prototype.setStopLoss = function setStopLoss(orderID, stopPrice) {
-  //
+function calculateStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {
+  const accValue = marginAllocation / margin;
+  const loss = accValue * maxLoss;
+  const highWater = marginAllocation - loss; // maximum margin loss
+  if (side === 'LONG') {
+    const unitPrice = lastPrice / marginAllocation;
+    return unitPrice * highWater;
+  }
+  if (side === 'SHORT') {
+    const inv = 1 / highWater;
+    const unitPrice = inv * marginAllocation;
+    console.log(`unit price ${unitPrice}`);
+    return unitPrice * lastPrice;
+  }
+  return 0;
+}
+
+Trade.prototype.setStopLoss = function setStopLoss(orderID, lastPrice) {
+  // FIXME need special function to calculate stop price
+
+  // const stopPrice = calculateStopLoss(lastPrice, config.maxLoss, marginAllocation);
   this.bitMexSetStopLoss(orderID, stopPrice);
 };
 
 exports.Trade = new Trade();
-
-// const tr = new Trade();
-// tr.openPosition('LONG', 3935, tr.);
