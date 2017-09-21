@@ -20,11 +20,9 @@ Engine.prototype.init = function init() {
   trade.init();
 };
 
-Engine.prototype.setOrderID = function setOrderID(response) {
-  console.log(`setting order id${response.body.orderID}`);
-  db
-    .setOrderID(response.body.orderID)
-    .catch(reply => console.log(`error setting order id${reply}`));
+Engine.prototype.setOrderID = function setOrderID(orderID) {
+  console.log(`setting order id${orderID}`);
+  db.setOrderID(orderID).catch(reply => console.log(`error setting order id${reply}`));
 };
 
 Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
