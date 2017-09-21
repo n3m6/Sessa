@@ -2,8 +2,6 @@ const config = require('./config');
 const unirest = require('unirest');
 const crypto = require('crypto');
 
-// FIXME refactor this library get rid of duplicate parts in the functions
-
 function bmHeaders(verb, path, postBody) {
   const expires = Date.now() + 60000;
   const signature = crypto
@@ -26,7 +24,7 @@ const BitMEX = function BitMEX() {};
 
 BitMEX.prototype.init = function init() {};
 
-BitMEX.prototype.getBitMexBalance = function getBitMexBalance() {
+BitMEX.prototype.getBalance = function getBalance() {
   return new Promise((resolve, reject) => {
     const verb = 'GET';
     const path = '/api/v1/user/wallet';
@@ -40,7 +38,7 @@ BitMEX.prototype.getBitMexBalance = function getBitMexBalance() {
   });
 };
 
-BitMEX.prototype.bitMexAdjustMargin = function bitMexAdjustMargin(margin) {
+BitMEX.prototype.adjustMargin = function adjustMargin(margin) {
   return new Promise((resolve, reject) => {
     const verb = 'POST';
     const path = '/api/v1/position/leverage';
@@ -62,7 +60,7 @@ BitMEX.prototype.bitMexAdjustMargin = function bitMexAdjustMargin(margin) {
   });
 };
 
-BitMEX.prototype.bitMexMarketOrder = function bitMexMarketOrder(side, orderQty) {
+BitMEX.prototype.marketOrder = function marketOrder(side, orderQty) {
   return new Promise((resolve, reject) => {
     const verb = 'POST';
     const path = '/api/v1/order';
@@ -87,7 +85,7 @@ BitMEX.prototype.bitMexMarketOrder = function bitMexMarketOrder(side, orderQty) 
   });
 };
 
-BitMEX.prototype.bitMexClosePosition = function bitMexClosePosition(orderId) {
+BitMEX.prototype.closePosition = function closePosition(orderId) {
   return new Promise((resolve, reject) => {
     const verb = 'POST';
     const path = '/api/v1/order';
@@ -114,14 +112,16 @@ BitMEX.prototype.bitMexClosePosition = function bitMexClosePosition(orderId) {
   });
 };
 
-// FIXME test stop loss function (haven't been tested yet)
-BitMEX.prototype.bitMexSetStopLoss = function bitMexSetStopLoss(orderId, stopPrice) {
+BitMEX.prototype.setStopLoss = function setStopLoss(side, orderId, stopPrice) {
   return new Promise((resolve, reject) => {
+    // choose opposite side of order side here
+    const newSide = side === 'LONG' ? 'Sell' : 'Buy';
     const verb = 'POST';
     const path = '/api/v1/order';
     const data = {
-      orderID: orderId,
       symbol: 'XBTUSD',
+      orderID: orderId,
+      side: newSide,
       ordType: 'Stop',
       stopPx: stopPrice,
       execInst: 'Close, LastPrice',
@@ -145,13 +145,3 @@ BitMEX.prototype.bitMexSetStopLoss = function bitMexSetStopLoss(orderId, stopPri
 };
 
 exports.BitMEX = new BitMEX();
-
-/* to test:
-bitMexSetStopLoss
-bitMexClosePosition
-bitMexMarketOrder
-bitMexAdjustMargin
-getBitMexBalance
-*/
-
-// const bm = new BitMEX();
