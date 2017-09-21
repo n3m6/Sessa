@@ -14,7 +14,7 @@ Trade.prototype.determineOrderQty = function determineOrderQty(price, balance) {
 };
 
 Trade.prototype.init = function init() {
-  // this.bitMexAdjustMargin(config.margin);
+  // bm.adjustMargin(config.margin);
 };
 
 Trade.prototype.openPosition = function openPosition(orderType, currentPrice, callback) {
@@ -22,22 +22,22 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, ca
   bm
     .getBitMexBalance()
     .then(balance => this.determineOrderQty(currentPrice, balance))
-    .then(orderSize => bm.bitMexMarketOrder(side, orderSize))
+    .then(orderSize => bm.marketOrder(side, orderSize))
     // FIXME remove these console logs
     .then(response => callback(response.body.orderID)) // make it return an array here
     .catch(error => console.error(`error ${error}`));
 };
 
-// FIXME change this to a promise function
 Trade.prototype.closePosition = function closePosition(orderID) {
   // console.log(`completed transaction ${position.orderType}`);
-  bm.bitMexClosePosition(orderID);
+  bm.closePosition(orderID);
 };
 
 function calculateStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {
   const accValue = marginAllocation / margin;
   const loss = accValue * maxLoss;
   const highWater = marginAllocation - loss; // maximum margin loss
+
   if (side === 'LONG') {
     const unitPrice = lastPrice / marginAllocation;
     return unitPrice * highWater;
@@ -51,11 +51,30 @@ function calculateStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {
   return 0;
 }
 
-Trade.prototype.setStopLoss = function setStopLoss(orderID, lastPrice) {
-  // FIXME need special function to calculate stop price
-
-  // const stopPrice = calculateStopLoss(lastPrice, config.maxLoss, marginAllocation);
-  bm.bitMexSetStopLoss(orderID, stopPrice);
+Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, lastPrice) {
+  const stopPrice = calculateStopLoss(side, lastPrice, config.margin, config.maxLoss, orderQty);
+  bm
+    .setStopLoss(side, orderID, stopPrice)
+    .then(console.log)
+    .catch(console.error);
 };
 
 exports.Trade = new Trade();
+
+/*
+functions to test
+openPosition(orderType, currentPrice, callback)
+setStopLoss(orderID, lastPrice)
+closePosition(orderID)
+*/
+
+// FIXME trade is entirely broken
+
+/* const tr = new Trade();
+const side = 'SHORT';
+const orderID = '5ba6ba46-6c0e-9630-7137-6c75463db404';
+const orderQty = 500;
+const lastPrice = '3871';
+
+tr.setStopLoss(side, orderID, orderQty, lastPrice);
+*/

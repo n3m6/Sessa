@@ -13,3 +13,5 @@ engine.init();
 
 console.log('#\tTimestamp\t\t\tClose\tVolume\tMA\tRSI\tMACD');
 client.addStream('XBTUSD', 'tradeBin1m', data => engine.oneMinuteProcessing(data));
+
+// FIXME add client monitoring for order updates below, it should update redis when order changes
