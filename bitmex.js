@@ -112,7 +112,61 @@ BitMEX.prototype.closePosition = function closePosition(orderId) {
   });
 };
 
-BitMEX.prototype.setStopLoss = function setStopLoss(side, orderId, stopPrice) {
+BitMEX.prototype.deleteOrder = function deleteUOrder(orderId) {
+  return new Promise((resolve, reject) => {
+    const verb = 'DELETE';
+    const path = '/api/v1/order';
+    const data = {
+      orderID: orderId,
+      symbol: 'XBTUSD',
+      execInst: 'Close',
+    };
+    const postBody = JSON.stringify(data);
+    const headers = bmHeaders(verb, path, postBody);
+
+    const request = unirest.delete(config.api.resthost + path);
+    request
+      .header(headers)
+      .send(postBody)
+      .end((response) => {
+        if (response.code === 200) {
+          console.log('position closed');
+          return resolve(response);
+        }
+        console.log('position could not be closed');
+        return reject(response);
+      });
+  });
+};
+
+BitMEX.prototype.deleteUOrder = function deleteUOrder(orderId) {
+  return new Promise((resolve, reject) => {
+    const verb = 'DELETE';
+    const path = '/api/v1/order';
+    const data = {
+      clOrdID: orderId,
+      symbol: 'XBTUSD',
+      execInst: 'Close',
+    };
+    const postBody = JSON.stringify(data);
+    const headers = bmHeaders(verb, path, postBody);
+
+    const request = unirest.delete(config.api.resthost + path);
+    request
+      .header(headers)
+      .send(postBody)
+      .end((response) => {
+        if (response.code === 200) {
+          console.log('position closed');
+          return resolve(response);
+        }
+        console.log('position could not be closed');
+        return reject(response);
+      });
+  });
+};
+
+BitMEX.prototype.setStopLoss = function setStopLoss(side, stopPrice) {
   return new Promise((resolve, reject) => {
     // choose opposite side of order side here
     const newSide = side === 'LONG' ? 'Sell' : 'Buy';
@@ -120,10 +174,9 @@ BitMEX.prototype.setStopLoss = function setStopLoss(side, orderId, stopPrice) {
     const path = '/api/v1/order';
     const data = {
       symbol: 'XBTUSD',
-      orderID: orderId,
       side: newSide,
-      ordType: 'Stop',
       stopPx: stopPrice,
+      ordType: 'Stop',
       execInst: 'Close, LastPrice',
     };
     const postBody = JSON.stringify(data);
