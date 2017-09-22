@@ -1,3 +1,5 @@
+const uuid = require('uuid/v1');
+
 function arraySlice(range, data) {
   return data.slice(data.length > range ? data.length - range : 0);
 }
@@ -18,8 +20,17 @@ function roundTo(n, digits) {
   return +test.toFixed(dig);
 }
 
+function uniqid() {
+  return uuid();
+}
+
 module.exports = {
   arraySlice,
   randomizer,
   roundTo,
+  uniqid,
 };
+
+console.log(uniqid());
+console.log(uniqid());
+console.log(uniqid());

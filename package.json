@@ -23,6 +23,7 @@
     "bitmex-realtime-api": "^0.2.3",
     "redis": "^2.8.0",
     "unirest": "^0.5.1",
+    "uuid": "^3.1.0",
     "ws": "^3.1.0"
   }
 }
