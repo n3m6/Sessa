@@ -20,7 +20,7 @@ function roundTo(n, digits) {
   return +test.toFixed(dig);
 }
 
-function uniqid() {
+function uid() {
   return uuid();
 }
 
@@ -28,9 +28,5 @@ module.exports = {
   arraySlice,
   randomizer,
   roundTo,
-  uniqid,
+  uid,
 };
-
-console.log(uniqid());
-console.log(uniqid());
-console.log(uniqid());
