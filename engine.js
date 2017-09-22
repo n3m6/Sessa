@@ -30,7 +30,7 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
 
   const rsi = utils.roundTo(financial.rsi(data, 14), 2);
   const macd = utils.roundTo(financial.macd(data, 12, 26, 9), 2);
-  const sma = utils.roundTo(financial.sma(data, 20), 2);
+  const sma = utils.roundTo(financial.sma(data, 30), 2);
 
   console.log(`${data.length}\t${lastCandle.timestamp}\t${lastCandle.close}\t${lastCandle.volume}\t${sma}\t${rsi}\t${macd}`);
 
