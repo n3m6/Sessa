@@ -14,7 +14,7 @@ Trade.prototype.determineOrderQty = function determineOrderQty(price, balance) {
 };
 
 Trade.prototype.init = function init() {
-  // bm.adjustMargin(config.margin);
+  bm.adjustMargin(config.margin);
 };
 
 Trade.prototype.openPosition = function openPosition(orderType, currentPrice, callback) {
@@ -24,7 +24,6 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, ca
     .then(balance => this.determineOrderQty(currentPrice, balance))
     .then(orderSize =>
       bm.marketOrder(side, orderSize).then((response) => {
-        console.log(`Market order reponse: ${JSON.stringify(response.body)}`);
         console.log('setting stop loss');
         this.setStopLoss(orderType, response.body.orderID, orderSize, currentPrice);
         callback(response.body.orderID);
@@ -34,9 +33,9 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, ca
 
 Trade.prototype.closePosition = function closePosition(orderID) {
   // console.log(`completed transaction ${position.orderType}`);
-  bm.closePosition(orderID);
+  bm.closePosition(orderID).catch(response => console.log(response));
   // FIXME if the stop loss trigger is still in the db
-  bm.deleteUOrder(orderID);
+  bm.deleteUOrder(orderID).catch(response => console.log(response));
 };
 
 function calculateStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {
@@ -62,7 +61,7 @@ Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, last
   console.log(`StopPrice: ${stopPrice}`);
   bm
     .setUStopLoss(side, stopPrice, orderID)
-    .then(response => console.log(response.body))
+    .then(response => console.log(`stop loss assigned for ${response.body.orderID}`))
     .catch(response => console.error(response.body));
 };
 

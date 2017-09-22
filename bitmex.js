@@ -192,7 +192,7 @@ BitMEX.prototype.setStopLoss = function setStopLoss(side, stopPrice) {
           console.log('stop loss set');
           return resolve(response);
         }
-        console.log(`could not set stop loss for position${JSON.stringify(response)}`);
+        console.log('could not set stop loss for position');
         return reject(response);
       });
   });
@@ -224,7 +224,7 @@ BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, uid) {
           console.log('stop loss set');
           return resolve(response);
         }
-        console.log(`could not set stop loss for position${JSON.stringify(response)}`);
+        console.log('could not set stop loss for position');
         return reject(response);
       });
   });
