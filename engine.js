@@ -4,6 +4,7 @@ const financial = require('./financial').Financial;
 const trade = require('./trade').Trade;
 const strategy = require('./strategy').Strategy;
 const db = require('./db').Db;
+const config = require('./config');
 
 const Engine = function Engine() {};
 
@@ -28,9 +29,12 @@ Engine.prototype.setOrderID = function setOrderID(orderID) {
 Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
   const lastCandle = data[data.length - 1];
 
-  const rsi = utils.roundTo(financial.rsi(data, 14), 2);
-  const macd = utils.roundTo(financial.macd(data, 12, 26, 9), 2);
-  const sma = utils.roundTo(financial.sma(data, 30), 2);
+  const rsi = utils.roundTo(financial.rsi(data, config.rsi), 2);
+  const macd = utils.roundTo(
+    financial.macd(data, config.macd.line1, config.macd.line2, config.macd.signal),
+    2,
+  );
+  const sma = utils.roundTo(financial.sma(data, config.sma), 2);
 
   console.log(`${data.length}\t${lastCandle.timestamp}\t${lastCandle.close}\t${lastCandle.volume}\t${sma}\t${rsi}\t${macd}`);
 
@@ -52,7 +56,7 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
               .catch(reply => console.log(`error ending trade${reply}`));
           }
         });
-      } else if (data.length > 16) {
+      } else if (data.length > config.rowSkip) {
         // check whether we should enter a trade
         let at = '';
         let ot = '';
