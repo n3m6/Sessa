@@ -20,17 +20,23 @@ Trade.prototype.init = function init() {
 Trade.prototype.openPosition = function openPosition(orderType, currentPrice, callback) {
   const side = orderType === 'LONG' ? 'Buy' : 'Sell';
   bm
-    .getBitMexBalance()
+    .getBalance()
     .then(balance => this.determineOrderQty(currentPrice, balance))
-    .then(orderSize => bm.marketOrder(side, orderSize))
-    // FIXME remove these console logs
-    .then(response => callback(response.body.orderID)) // make it return an array here
-    .catch(error => console.error(`error ${error}`));
+    .then(orderSize =>
+      bm.marketOrder(side, orderSize).then((response) => {
+        console.log(`Market order reponse: ${JSON.stringify(response.body)}`);
+        console.log('setting stop loss');
+        this.setStopLoss(orderType, response.body.orderID, orderSize, currentPrice);
+        callback(response.body.orderID);
+      }))
+    .catch(response => console.log(response));
 };
 
 Trade.prototype.closePosition = function closePosition(orderID) {
   // console.log(`completed transaction ${position.orderType}`);
   bm.closePosition(orderID);
+  // FIXME if the stop loss trigger is still in the db
+  bm.deleteUOrder(orderID);
 };
 
 function calculateStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {
@@ -40,41 +46,24 @@ function calculateStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {
 
   if (side === 'LONG') {
     const unitPrice = lastPrice / marginAllocation;
-    return unitPrice * highWater;
+    return Math.round(unitPrice * highWater);
   }
   if (side === 'SHORT') {
     const inv = 1 / highWater;
     const unitPrice = inv * marginAllocation;
-    console.log(`unit price ${unitPrice}`);
-    return unitPrice * lastPrice;
+    return Math.round(unitPrice * lastPrice);
   }
   return 0;
 }
 
 Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, lastPrice) {
+  // stop Price should be a rounded integer for BitMEX
   const stopPrice = calculateStopLoss(side, lastPrice, config.margin, config.maxLoss, orderQty);
+  console.log(`StopPrice: ${stopPrice}`);
   bm
-    .setStopLoss(side, orderID, stopPrice)
-    .then(console.log)
-    .catch(console.error);
+    .setUStopLoss(side, stopPrice, orderID)
+    .then(response => console.log(response.body))
+    .catch(response => console.error(response.body));
 };
 
 exports.Trade = new Trade();
-
-/*
-functions to test
-openPosition(orderType, currentPrice, callback)
-setStopLoss(orderID, lastPrice)
-closePosition(orderID)
-*/
-
-// FIXME trade is entirely broken
-
-/* const tr = new Trade();
-const side = 'SHORT';
-const orderID = '5ba6ba46-6c0e-9630-7137-6c75463db404';
-const orderQty = 500;
-const lastPrice = '3871';
-
-tr.setStopLoss(side, orderID, orderQty, lastPrice);
-*/

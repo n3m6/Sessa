@@ -21,7 +21,7 @@ Engine.prototype.init = function init() {
 };
 
 Engine.prototype.setOrderID = function setOrderID(orderID) {
-  console.log(`setting order id${orderID}`);
+  console.log(`recording order id in db ${orderID}`);
   db.setOrderID(orderID).catch(reply => console.log(`error setting order id${reply}`));
 };
 

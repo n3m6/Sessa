@@ -112,7 +112,7 @@ BitMEX.prototype.closePosition = function closePosition(orderId) {
   });
 };
 
-BitMEX.prototype.deleteOrder = function deleteUOrder(orderId) {
+BitMEX.prototype.deleteOrder = function deleteOrder(orderId) {
   return new Promise((resolve, reject) => {
     const verb = 'DELETE';
     const path = '/api/v1/order';
@@ -166,6 +166,7 @@ BitMEX.prototype.deleteUOrder = function deleteUOrder(orderId) {
   });
 };
 
+// Use setUStopLoss instead of this. pass the order id from position
 BitMEX.prototype.setStopLoss = function setStopLoss(side, stopPrice) {
   return new Promise((resolve, reject) => {
     // choose opposite side of order side here
@@ -197,4 +198,57 @@ BitMEX.prototype.setStopLoss = function setStopLoss(side, stopPrice) {
   });
 };
 
+BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, uid) {
+  return new Promise((resolve, reject) => {
+    // choose opposite side of order side here
+    const newSide = side === 'LONG' ? 'Sell' : 'Buy';
+    const verb = 'POST';
+    const path = '/api/v1/order';
+    const data = {
+      symbol: 'XBTUSD',
+      side: newSide,
+      stopPx: stopPrice,
+      clOrdID: uid,
+      ordType: 'Stop',
+      execInst: 'Close, LastPrice',
+    };
+    const postBody = JSON.stringify(data);
+    const headers = bmHeaders(verb, path, postBody);
+
+    const request = unirest.post(config.api.resthost + path);
+    request
+      .header(headers)
+      .send(postBody)
+      .end((response) => {
+        if (response.code === 200) {
+          console.log('stop loss set');
+          return resolve(response);
+        }
+        console.log(`could not set stop loss for position${JSON.stringify(response)}`);
+        return reject(response);
+      });
+  });
+};
+
 exports.BitMEX = new BitMEX();
+
+/* const bm = new BitMEX();
+const orderside = 'Buy';
+const side = 'LONG';
+const orderID = '';
+const stopPrice = '3650';
+
+bm
+  .marketOrder(orderside, 1000)
+  .then(response =>
+    setTimeout(() => {
+      bm
+        .setUStopLoss(side, stopPrice, response.body.orderID)
+        .then(response1 =>
+          setTimeout(() => {
+            bm.deleteUOrder(response.body.orderID);
+            bm.closePosition(response.body.orderID);
+          }, 30000))
+        .catch(response1 => console.log(response1));
+    }, 3000))
+  .catch(response => console.log(response)); */
