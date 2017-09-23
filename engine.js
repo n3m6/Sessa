@@ -123,9 +123,9 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
 };
 
 Engine.prototype.fiveMinuteProcessing = function fiveMinuteProcessing(data) {
-  console.log(JSON.stringify(data[data.length - 1]));
+  // console.log(JSON.stringify(data[data.length - 1]));
   if (data.length % 5 === 0) {
-    console.log('5 min bin triggered');
+    // console.log('5 min bin triggered');
     const block = {};
     block.open = data[data.length - 5].open;
     block.high = getHigh(data);
