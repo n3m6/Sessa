@@ -148,7 +148,7 @@ Engine.prototype.fiveMinuteProcessing = function fiveMinuteProcessing(data) {
       .length}\t${lastCandle.timestamp}\t${lastCandle.close}\t${lastCandle.volume}\t${sma}\t${rsi}\t${macd}`);
 
     // Send to processing
-    this.process(lastCandle, data.length, rsi, macd, sma);
+    this.process(lastCandle, this.fiveMinBin.length, rsi, macd, sma);
   }
 };
 
