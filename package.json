@@ -7,7 +7,10 @@
     "test": "mocha",
     "start": "node main.js"
   },
-  "keywords": ["crypto", "trader"],
+  "keywords": [
+    "crypto",
+    "trader"
+  ],
   "author": "Abdulla Faraz",
   "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
@@ -18,7 +21,10 @@
   },
   "dependencies": {
     "bitmex-realtime-api": "^0.2.3",
+    "eventemitter2": "^4.1.2",
+    "lodash": "^4.17.4",
     "redis": "^2.8.0",
+    "superagent": "^3.6.0",
     "unirest": "^0.5.1",
     "uuid": "^3.1.0",
     "ws": "^3.1.0"
