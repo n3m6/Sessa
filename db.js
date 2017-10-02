@@ -2,6 +2,7 @@ const client = require('./dbconnection');
 
 client.on('error', (err) => {
   console.log(`DB Error. Is DB available? ${err}`);
+  throw err;
 });
 
 /*

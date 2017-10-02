@@ -68,7 +68,7 @@ Engine.prototype.setOrderID = function setOrderID(orderID) {
   db.setOrderID(orderID).catch(reply => console.log(`error setting order id${reply}`));
 };
 
-Engine.prototype.process = function process(lastCandle, length, rsi, macd, sma) {
+Engine.prototype.processTrade = function processTrade(lastCandle, length, rsi, macd, sma) {
   db
     .getActiveTrade() // check if there's an active trade in the db
     .then((activeTrade) => {
@@ -119,7 +119,7 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(data) {
   console.log(`${data.length}\t${lastCandle.timestamp}\t${lastCandle.close}\t${lastCandle.volume}\t${sma}\t${rsi}\t${macd}`);
 
   // Send to process to handle the data
-  this.process(lastCandle, data.length, rsi, macd, sma);
+  this.processTrade(lastCandle, data.length, rsi, macd, sma);
 };
 
 Engine.prototype.fiveMinuteProcessing = function fiveMinuteProcessing(data) {
@@ -148,7 +148,7 @@ Engine.prototype.fiveMinuteProcessing = function fiveMinuteProcessing(data) {
       .length}\t${lastCandle.timestamp}\t${lastCandle.close}\t${lastCandle.volume}\t${sma}\t${rsi}\t${macd}`);
 
     // Send to processing
-    this.process(lastCandle, this.fiveMinBin.length, rsi, macd, sma);
+    this.processTrade(lastCandle, this.fiveMinBin.length, rsi, macd, sma);
   }
 };
 
