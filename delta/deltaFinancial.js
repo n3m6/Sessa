@@ -48,7 +48,6 @@ DeltaFinancial.prototype.rsi = function rsi(data, range, current) {
     return [avggain, avgloss, rsitmp];
   }
 
-  // FIXME fix this part
   const currentCandle = current;
   const lastCandle = data[data.length - 1];
 
@@ -72,6 +71,41 @@ DeltaFinancial.prototype.rsi = function rsi(data, range, current) {
   rsitmp = utils.roundTo(rsitmp, config.significant);
 
   return [avggain, avgloss, rsitmp];
+};
+
+function macdEMA(previousEMA, currentClose, range) {
+  const r = 2 / (range + 1);
+  const curr = currentClose * r;
+  const prev = previousEMA * (1 - r);
+  return curr + prev;
+}
+
+// MACD Moving average convergence divergence - for finding entry point
+DeltaFinancial.prototype.macd = function macd(data, range1, range2, signalRange, current) {
+  if (data[0] === null) {
+    const d = current.close;
+    const ema12 = utils.roundTo(d, config.significant);
+    const ema26 = utils.roundTo(d, config.significant);
+    const signal = 0;
+    const tmacd = 0.01;
+    return [ema12, ema26, signal, tmacd];
+  }
+
+  const pre12ema = data[data.length - 1].mema12;
+  const pre26ema = data[data.length - 1].mema26;
+  const presignal = data[data.length - 1].msignal;
+  const d = current.close;
+
+  const range1EMA = macdEMA(pre12ema, d, range1);
+  const range2EMA = macdEMA(pre26ema, d, range2);
+  const macdLine = range1EMA - range2EMA;
+
+  const ema12 = utils.roundTo(range1EMA, config.significant);
+  const ema26 = utils.roundTo(range2EMA, config.significant);
+  const signal = utils.roundTo(macdEMA(presignal, macdLine, signalRange), 4);
+  const tmacd = utils.roundTo(macdLine - signal, 4);
+
+  return [ema12, ema26, signal, tmacd];
 };
 
 exports.DeltaFinancial = new DeltaFinancial();

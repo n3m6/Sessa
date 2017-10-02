@@ -3,7 +3,7 @@ const db = require('./deltadb.js').DeltaDB;
 const df = require('./deltaFinancial.js').DeltaFinancial;
 
 const DeltaRecord = function DeltaRecord() {
-  console.log('TIME\t\t\t\tOPEN\tHIGH\tLOW\tCLOSE\tTRADES\tVOL\tVWAP\tSMA30\tRSI\tRSI_GA\tRSI_LO');
+  console.log('TIME\t\t\t\tOPEN\tHIGH\tLOW\tCLOSE\tTRADES\tVOL\tVWAP\tSMA30\tRSI\tRSI_GA\tRSI_LO\tMACD12\tMACD26\tSGNL\tMACD');
 };
 
 const bitmex1MinPrefix = config.bitmex1MinPrefix; // eslint-disable-line
@@ -11,20 +11,18 @@ const bitmex1MinPrefix = config.bitmex1MinPrefix; // eslint-disable-line
 DeltaRecord.prototype.process = function process(data) {
   const lastCandle = data[data.length - 1];
   const {
-    timestamp, symbol, open, high, low, close, trades, volume, vwap,
+    timestamp,
+    symbol, // eslint-disable-line
+    open,
+    high,
+    low,
+    close,
+    trades,
+    volume,
+    vwap,
   } = lastCandle;
   const jsDate = new Date(timestamp);
   const nixtime = jsDate.getTime();
-
-  /* const {
-    timestamp, side, size, price,
-  } = lastCandle;
-  const close = price;
-  const jsDate = new Date(timestamp);
-  const nixtime = jsDate.getTime(); */
-  // console.log(nixtime);
-
-  // console.log(`${nixtime}\t${timestamp}\t${symbol}\t${open}\t${high}\t${low}\t${close}\t${trades}\t${volume}\t${vwap}`);
 
   db
     .get1MinLast50()
@@ -36,7 +34,14 @@ DeltaRecord.prototype.process = function process(data) {
         // IF records are empty start entering data
         const sma30 = df.sma(response, 30, close);
         const [avggain, avgloss, rsi] = df.rsi(response, config.rsi, lastCandle);
-        db.insert1min(
+        const [mema12, mema26, msignal, macd] = df.macd(
+          response,
+          config.macd.line1,
+          config.macd.line2,
+          config.macd.signal,
+          lastCandle,
+        );
+        const args = {
           nixtime,
           open,
           high,
@@ -49,7 +54,12 @@ DeltaRecord.prototype.process = function process(data) {
           rsi,
           avggain,
           avgloss,
-        );
+          mema12,
+          mema26,
+          msignal,
+          macd,
+        };
+        db.insert1min(args).catch(console.error);
       } else {
         // ELSE we're working with existing data so get data
         //    IF data is inconsistent start fresh
@@ -58,7 +68,15 @@ DeltaRecord.prototype.process = function process(data) {
 
         const sma30 = df.sma(response, 30, close);
         const [avggain, avgloss, rsi] = df.rsi(response, config.rsi, lastCandle);
-        db.insert1min(
+        const [mema12, mema26, msignal, macd] = df.macd(
+          response,
+          config.macd.line1,
+          config.macd.line2,
+          config.macd.signal,
+          lastCandle,
+        );
+
+        const args = {
           nixtime,
           open,
           high,
@@ -71,16 +89,16 @@ DeltaRecord.prototype.process = function process(data) {
           rsi,
           avggain,
           avgloss,
-        );
-
+          mema12,
+          mema26,
+          msignal,
+          macd,
+        };
+        db.insert1min(args).catch(console.error);
         // console.log(response);
       }
     })
     .catch(console.error);
-
-  /* db
-    .insert1Min(timestamp, symbol, open, high, low, close, trades, volume, vwap)
-    .catch(console.error); */
 };
 
 exports.DeltaRecord = new DeltaRecord();

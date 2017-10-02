@@ -54,29 +54,35 @@ DeltaDB.prototype.get1MinLast50 = function get1MinLast50() {
 };
 
 // FIXME insert a 1min bin
-DeltaDB.prototype.insert1min = function insert1Min(
-  timestamp,
-  open,
-  high,
-  low,
-  close,
-  trades,
-  volume,
-  tvwap,
-  sma30,
-  rsi,
-  rsiavggain,
-  rsiavgloss,
-  /* macd,
-  sma50,
+DeltaDB.prototype.insert1min = function insert1Min(args) {
+  const {
+    nixtime,
+    open,
+    high,
+    low,
+    close,
+    trades,
+    volume,
+    vwap,
+    sma30,
+    rsi,
+    avggain,
+    avgloss,
+    mema12,
+    mema26,
+    msignal,
+    macd,
+  } = args;
+
+  /* sma50,
   sma100,
   sma200,
   ema9, */
-) {
-  const vwap = tvwap === null ? 'null' : utils.roundTo(tvwap, config.significant);
+  const timestamp = nixtime;
+  const tvwap = vwap === null ? 'null' : utils.roundTo(vwap, config.significant);
 
   return new Promise((resolve, reject) => {
-    const args = [
+    const inargs = [
       `${bitmex1MinPrefix}:${timestamp}`,
       'open',
       open,
@@ -91,29 +97,32 @@ DeltaDB.prototype.insert1min = function insert1Min(
       'volume',
       volume,
       'vwap',
-      vwap,
+      tvwap,
       'sma30',
       sma30,
       'rsi',
       rsi,
       'rsiavggain',
-      rsiavggain,
+      avggain,
       'rsiavgloss',
-      rsiavgloss,
+      avgloss,
+      'mema12',
+      mema12,
+      'mema26',
+      mema26,
+      'msignal',
+      msignal,
+      'macd',
+      macd,
     ];
     const zargs = [`${bitmex1MinPrefix}`, `${timestamp}`, timestamp];
     const t = new Date(timestamp);
     const tTime = t.toISOString();
-    console.log(`${tTime}\t${open}\t${high}\t${low}\t${close}\t${trades}\t${volume}\t${vwap}\t${sma30}\t${rsi}\t${rsiavggain}\t${rsiavgloss}`);
+    console.log(`${tTime}\t${open}\t${high}\t${low}\t${close}\t${trades}\t${volume}\t${tvwap}\t${sma30}\t${rsi}\t${avggain}\t${avgloss}\t${mema12}\t${mema26}\t${msignal}\t${macd}`);
 
-    // console.log(args);
-    // console.log(zargs);
-    // insert to hash
-    // insert to ordered set, so it can queried
-    // do this with a multi
     client
       .multi()
-      .hmset(args)
+      .hmset(inargs)
       .zadd(zargs)
       .exec((err, replies) => {
         if (err) reject(err);
