@@ -84,6 +84,8 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
   return new Promise((resolve, reject) => {
     const inargs = [
       `${bitmex1MinPrefix}:${timestamp}`,
+      'timestamp',
+      timestamp,
       'open',
       open,
       'high',

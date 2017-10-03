@@ -17,8 +17,9 @@ DeltaFinancial.prototype.sma = function sma(data, range, currClose) {
 DeltaFinancial.prototype.rsi = function rsi(data, range, current) {
   if (data.length < range) return [1, 1, 1]; // ignore first part
 
+  // FIXME this could be
   if (data.length === range) {
-    const tmp = data;
+    const tmp = data.slice(); // lmao copy array not create another reference
     tmp.push(current);
     const candles = utils.arraySlice(tmp, data);
     const gains = candles.filter(elem => elem.close > elem.open);
