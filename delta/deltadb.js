@@ -153,7 +153,11 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
       'macd',
       macd,
     ];
+    // args for sorted set
     const zargs = [`${bitmex1MinPrefix}`, `${timestamp}`, timestamp];
+    // args for pubsub
+    const pargs = [`${bitmex1MinPrefix}:pubsub`, timestamp];
+
     const t = new Date(timestamp);
     const tTime = t.toISOString();
     console.log(`${tTime}\t${open}\t${high}\t${low}\t${close}\t${trades}\t${volume}\t${tvwap}\t${sma30}\t${rsi}\t${rsiavggain}\t${rsiavgloss}\t${mema12}\t${mema26}\t${msignal}\t${macd}`);
@@ -162,6 +166,7 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
       .multi()
       .hmset(inargs)
       .zadd(zargs)
+      .publish(pargs)
       .exec((err, replies) => {
         if (err) reject(err);
         resolve(replies);
@@ -224,7 +229,11 @@ DeltaDB.prototype.insert5min = function insert5min(args) {
       'macd',
       macdFive,
     ];
+    // args for sorted set
     const zargs = [`${bitmex5MinPrefix}`, `${timestamp}`, timestamp];
+    // args for pubsub
+    const pargs = [`${bitmex5MinPrefix}:pubsub`, timestamp];
+
     const t = new Date(timestamp);
     const tTime = t.toISOString();
     console.log('----------- 5 min -----------');
@@ -235,6 +244,7 @@ DeltaDB.prototype.insert5min = function insert5min(args) {
       .multi()
       .hmset(inargs)
       .zadd(zargs)
+      .publish(pargs)
       .exec((err, replies) => {
         if (err) reject(err);
         resolve(replies);
