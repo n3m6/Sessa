@@ -1,5 +1,6 @@
+const config = require('./config');
 const redis = require('redis');
 
-const port = 6379;
-const host = 'localhost';
+const { port, host } = config.redis;
+
 module.exports = redis.createClient(port, host, { no_ready_check: true });

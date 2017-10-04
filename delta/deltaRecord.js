@@ -4,7 +4,7 @@ const df = require('./deltaFinancial.js').DeltaFinancial;
 const utils = require('../utils');
 
 const DeltaRecord = function DeltaRecord() {
-  console.log('TIME\t\t\t\tOPEN\tHIGH\tLOW\tCLOSE\tTRADES\tVOL\tVWAP\tSMA30\tRSI\tRSI_GA\tRSI_LO\tMACD12\tMACD26\tSGNL\tMACD');
+  console.log('TIME\t\t\t\tOPEN\tHIGH\tLOW\tCLOSE\tTRADES\tVOL\tSMA30\tRSI\tMACD');
 };
 
 const bitmex1MinPrefix = config.bitmex1MinPrefix; // eslint-disable-line
