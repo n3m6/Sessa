@@ -103,10 +103,10 @@ BitMEX.prototype.closePosition = function closePosition(orderId) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          console.log('position closed');
+          // console.log('position closed');
           return resolve(response);
         }
-        console.log('position could not be closed');
+        console.log('Error: position could not be closed');
         return reject(response);
       });
   });
@@ -130,10 +130,10 @@ BitMEX.prototype.deleteOrder = function deleteOrder(orderId) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          console.log('position closed');
+          // console.log('position closed');
           return resolve(response);
         }
-        console.log('position could not be closed');
+        console.log('Error: position could not be closed');
         return reject(response);
       });
   });
@@ -157,10 +157,10 @@ BitMEX.prototype.deleteUOrder = function deleteUOrder(orderId) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          console.log('position closed');
+          // console.log('position closed');
           return resolve(response);
         }
-        console.log('position could not be closed');
+        console.log('Erorr: position could not be closed');
         return reject(response);
       });
   });
@@ -189,10 +189,10 @@ BitMEX.prototype.setStopLoss = function setStopLoss(side, stopPrice) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          console.log('stop loss set');
+          // console.log('stop loss set');
           return resolve(response);
         }
-        console.log('could not set stop loss for position');
+        console.log('Error: could not set stop loss for position');
         return reject(response);
       });
   });
@@ -221,10 +221,10 @@ BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, uid) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          console.log('stop loss set');
+          // console.log('stop loss set');
           return resolve(response);
         }
-        console.log('could not set stop loss for position');
+        console.log('Error: could not set stop loss for position');
         return reject(response);
       });
   });

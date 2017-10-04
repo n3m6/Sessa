@@ -24,7 +24,7 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, ca
     .then(balance => this.determineOrderQty(currentPrice, balance))
     .then(orderSize =>
       bm.marketOrder(side, orderSize).then((response) => {
-        console.log('setting stop loss');
+        // console.log('setting stop loss');
         this.setStopLoss(orderType, response.body.orderID, orderSize, currentPrice);
         callback(response.body.orderID);
       }))
@@ -61,7 +61,7 @@ Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, last
   console.log(`StopPrice: ${stopPrice}`);
   bm
     .setUStopLoss(side, stopPrice, orderID)
-    .then(response => console.log(`stop loss assigned for ${response.body.orderID}`))
+    .then(console.log('Stop Loss Assigned'))
     .catch(response => console.error(response.body));
 };
 
