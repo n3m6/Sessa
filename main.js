@@ -1,22 +1,33 @@
+const redis = require('redis');
 const config = require('./config');
 const engine = require('./engine').Engine;
-// const BitmexClient = require('bitmex-realtime-api');
-const BitmexClient = require('./bitmexlib/bitmexlib.js');
 
-const client = new BitmexClient(config.bitmexConfig);
+const { port, host } = config.redis;
+const pubsub = redis.createClient(port, host, { no_ready_check: true });
 
-client.on('open', () => console.log('connection opened.'));
-client.on('error', () => console.log('caught error'));
-client.on('close', () => console.log('connection closed.'));
-client.on('initialize', () => console.log('initialized, waiting for data'));
+/*
+Main requires an active delta server that processes incoming trades
+and attaches values like RSI and MACD to it.
+Run delta server independently from main
+*/
+
+pubsub.on('error', (err) => {
+  console.log(`DB Error. Is DB available? ${err}`);
+  throw err;
+});
 
 engine.init();
 
-// console.log('#\tTimestamp\t\t\tClose\tVolume\tMA\tRSI\tMACD');
-// client.addStream('XBTUSD', 'tradeBin1m', data => engine.oneMinuteProcessing(data));
-// client.addStream('XBTUSD', 'tradeBin1m', data => engine.fiveMinuteProcessing(data));
+/*
+two pubsubs exist right now, 1 minute pubsub and 5 min pubsub
+use one or the other (but not both) for processing your trades
+*/
 
-client.addStream('XBTUSD', 'tradeBin1m', data =>
-  console.log(JSON.stringify(data[data.length - 1])));
+const pubsubFiveMin = `${config.bitmex5MinPrefix}:pubsub`;
+
+pubsub.subscribe(pubsubFiveMin);
+pubsub.on('message', (channel, message) => {
+  engine.fiveMinuteProcessing(message);
+});
 
 // FIXME add client monitoring for order updates below, it should update redis when order changes
