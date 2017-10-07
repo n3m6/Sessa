@@ -103,7 +103,6 @@ BitMEX.prototype.closePosition = function closePosition(orderId) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          // console.log('position closed');
           return resolve(response);
         }
         console.log('Error: position could not be closed');
@@ -189,7 +188,6 @@ BitMEX.prototype.setStopLoss = function setStopLoss(side, stopPrice) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          // console.log('stop loss set');
           return resolve(response);
         }
         console.log('Error: could not set stop loss for position');
@@ -221,7 +219,6 @@ BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, uid) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          // console.log('stop loss set');
           return resolve(response);
         }
         console.log('Error: could not set stop loss for position');
@@ -231,24 +228,3 @@ BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, uid) {
 };
 
 exports.BitMEX = new BitMEX();
-
-/* const bm = new BitMEX();
-const orderside = 'Buy';
-const side = 'LONG';
-const orderID = '';
-const stopPrice = '3650';
-
-bm
-  .marketOrder(orderside, 1000)
-  .then(response =>
-    setTimeout(() => {
-      bm
-        .setUStopLoss(side, stopPrice, response.body.orderID)
-        .then(response1 =>
-          setTimeout(() => {
-            bm.deleteUOrder(response.body.orderID);
-            bm.closePosition(response.body.orderID);
-          }, 30000))
-        .catch(response1 => console.log(response1));
-    }, 3000))
-  .catch(response => console.log(response)); */
