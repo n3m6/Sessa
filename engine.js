@@ -15,7 +15,7 @@ Engine.prototype.setOrderID = function setOrderID(orderID) {
 
 Engine.prototype.processTrade = function processTrade(lastCandle) {
   // eslint-disable-next-line
-  const [timestamp, open, high, low, close, sma30, rsi, macd] = lastCandle;
+  const [timestamp, open, high, low, close, sma20, sma30, rsi, macd] = lastCandle;
 
   const tTime = new Date(parseInt(timestamp, 10));
 
@@ -26,7 +26,7 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
         // check whether we should end the trade
         db.getOrderType().then((orderType) => {
           console.log(`Active Trade ${tTime.toISOString()} ${orderType} ${close} ${sma30}`);
-          if (strategy.threeGreenExit(close, sma30, orderType)) {
+          if (strategy.threeGreenExit(close, sma20, orderType)) {
             console.log(`Close signal ${tTime.toISOString()} ${close} ${sma30}`);
             console.log('----------- CLOSING POSITION -----------');
             db
@@ -42,7 +42,7 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
         // check whether we should enter a trade
         let at = ''; // active trade
         let ot = ''; // order type
-        [at, ot] = strategy.threeGreenEnter(close, sma30, macd, rsi);
+        [at, ot] = strategy.threeGreenEnter(close, sma20, macd, rsi);
 
         // if an order needs to be placed
         if (at === true) {
@@ -69,6 +69,13 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(timestamp) {
 Engine.prototype.fiveMinuteProcessing = function fiveMinuteProcessing(timestamp) {
   db
     .getFiveCandle(timestamp)
+    .then(reply => this.processTrade(reply))
+    .catch(console.error);
+};
+
+Engine.prototype.fifteenMinuteProcessing = function fifteenMinuteProcessing(timestamp) {
+  db
+    .getFifteenCandle(timestamp)
     .then(reply => this.processTrade(reply))
     .catch(console.error);
 };

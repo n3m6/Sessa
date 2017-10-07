@@ -75,7 +75,18 @@ Db.prototype.setOrderType = function setOrderType(orderType) {
 Db.prototype.getOneCandle = function getOneCandle(timestamp) {
   return new Promise((resolve, reject) => {
     const key = `${config.bitmex1MinPrefix}:${timestamp}`;
-    const args = [key, 'timestamp', 'open', 'high', 'low', 'close', 'sma30', 'rsi', 'macd'];
+    const args = [
+      key,
+      'timestamp',
+      'open',
+      'high',
+      'low',
+      'close',
+      'sma20',
+      'sma30',
+      'rsi',
+      'macd',
+    ];
     client.hmget(args, (err, reply) => {
       if (err) return reject(err);
       return resolve(reply);
@@ -86,7 +97,40 @@ Db.prototype.getOneCandle = function getOneCandle(timestamp) {
 Db.prototype.getFiveCandle = function getFiveCandle(timestamp) {
   return new Promise((resolve, reject) => {
     const key = `${config.bitmex5MinPrefix}:${timestamp}`;
-    const args = [key, 'timestamp', 'open', 'high', 'low', 'close', 'sma30', 'rsi', 'macd'];
+    const args = [
+      key,
+      'timestamp',
+      'open',
+      'high',
+      'low',
+      'close',
+      'sma20',
+      'sma30',
+      'rsi',
+      'macd',
+    ];
+    client.hmget(args, (err, reply) => {
+      if (err) return reject(err);
+      return resolve(reply);
+    });
+  });
+};
+
+Db.prototype.getFifteenCandle = function getFifteenCandle(timestamp) {
+  return new Promise((resolve, reject) => {
+    const key = `${config.bitmex15MinPrefix}:${timestamp}`;
+    const args = [
+      key,
+      'timestamp',
+      'open',
+      'high',
+      'low',
+      'close',
+      'sma20',
+      'sma30',
+      'rsi',
+      'macd',
+    ];
     client.hmget(args, (err, reply) => {
       if (err) return reject(err);
       return resolve(reply);
