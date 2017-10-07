@@ -51,6 +51,18 @@ function fiveMinuteProcessing(lastFive) {
   const volumeFive = getVolume(lastFive);
   return [openFive, highFive, lowFive, closeFive, tradesFive, volumeFive];
 }
+
+function fifteenMinuteProcessing(lastFifteen) {
+  const openFifteen = lastFifteen[0] === null ? lastFifteen[1].open : lastFifteen[0].open;
+  // first element is null when we start on the exact 5 min mark
+  const highFifteen = getHigh(lastFifteen);
+  const lowFifteen = getLow(lastFifteen);
+  const closeFifteen = lastFifteen[lastFifteen.length - 1].close;
+  const tradesFifteen = getTrades(lastFifteen);
+  const volumeFifteen = getVolume(lastFifteen);
+  return [openFifteen, highFifteen, lowFifteen, closeFifteen, tradesFifteen, volumeFifteen];
+}
+
 // set up simple get/set for db values
 DeltaRecord.prototype.process = function process(data) {
   const lastCandle = data[data.length - 1];
@@ -119,11 +131,7 @@ DeltaRecord.prototype.process = function process(data) {
 
         // Processing trades at 5 min bins
         if (jsDate.getMinutes() % 5 === 0) {
-          // console.log('response');
-          // console.log(JSON.stringify(response));
           const lastFive = utils.arraySlice(4, response);
-          // console.log('array slice');
-          // console.log(JSON.stringify(lastFive));
 
           lastFive.push(args);
 
@@ -180,6 +188,68 @@ DeltaRecord.prototype.process = function process(data) {
               };
               // insert data
               db.insert5min(fiveArgs).catch(console.error);
+            })
+            .catch(console.error);
+        }
+
+        // Processing trades in 15 min bins
+        if (jsDate.getMinutes() % 15 === 0) {
+          const lastFifteen = utils.arraySlice(14, response);
+
+          lastFifteen.push(args);
+
+          const [
+            openFifteen,
+            highFifteen,
+            lowFifteen,
+            closeFifteen,
+            tradesFifteen,
+            volumeFifteen,
+          ] = fifteenMinuteProcessing(lastFifteen);
+
+          db
+            .get15MinLast50()
+            .then((responseFifteen) => {
+              const lastCandleFifteen = {
+                open: openFifteen,
+                high: highFifteen,
+                low: lowFifteen,
+                close: closeFifteen,
+              };
+              const sma30Fifteen = df.sma(responseFifteen, 30, closeFifteen);
+              const [rsigainFifteen, rsilossFifteen, rsiFifteen] = df.rsi(
+                responseFifteen,
+                config.rsi,
+                lastCandleFifteen,
+              );
+
+              const [mema12Fifteen, mema26Fifteen, msignalFifteen, macdFifteen] = df.macd(
+                responseFifteen,
+                config.macd.line1,
+                config.macd.line2,
+                config.macd.signal,
+                lastCandleFifteen,
+              );
+
+              const fifteenArgs = {
+                nixtime,
+                openFifteen,
+                highFifteen,
+                lowFifteen,
+                closeFifteen,
+                tradesFifteen,
+                volumeFifteen,
+                sma30Fifteen,
+                rsiFifteen,
+                rsigainFifteen,
+                rsilossFifteen,
+                mema12Fifteen,
+                mema26Fifteen,
+                msignalFifteen,
+                macdFifteen,
+              };
+              // insert data
+              db.insert15min(fifteenArgs).catch(console.error);
             })
             .catch(console.error);
         }
