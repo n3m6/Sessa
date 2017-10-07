@@ -1,4 +1,4 @@
-const utils = require('./utils.js');
+/* const utils = require('./utils.js');
 
 const Financial = function Financial() {
   this.prev12ema = 0;
@@ -170,6 +170,7 @@ Financial.prototype.atr = function atr(data, range) {
 // };
 
 exports.Financial = new Financial();
+*/
 
 // test code
 /* const fin = new Financial();

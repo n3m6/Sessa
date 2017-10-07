@@ -32,7 +32,6 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, ca
 };
 
 Trade.prototype.closePosition = function closePosition(orderID) {
-  // console.log(`completed transaction ${position.orderType}`);
   bm.closePosition(orderID).catch(response => console.log(response));
   // FIXME if the stop loss trigger is still in the db
   bm.deleteUOrder(orderID).catch(response => console.log(response));

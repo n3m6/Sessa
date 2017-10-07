@@ -8,6 +8,7 @@ Ordered Set BitMEX:XBTUSD:1min (key 'timestamp' value 'timestamp')
 
 use ordered set to range search by time for removal and filter functions
 */
+
 const bitmex1MinPrefix = config.bitmex1MinPrefix; // eslint-disable-line
 const bitmex5MinPrefix = config.bitmex5MinPrefix; // eslint-disable-line
 const bitmex15MinPrefix = config.bitmex15MinPrefix; // eslint-disable-line
@@ -21,23 +22,17 @@ const DeltaDB = function DeltaDB() {};
 
 DeltaDB.prototype.get1MinLast50 = function get1MinLast50() {
   return new Promise((resolve, reject) => {
-    // FIXME
     const endTime = new Date().getTime();
     const startTime = endTime - 3060000; // 51*60*1000 (51 minutes in millisecs)
-    // const startTime = '-inf';
-    // const endTime = '+inf';
+
     const args = [bitmex1MinPrefix, startTime, endTime];
-    // console.log(args);
 
     // eslint-disable-next-line
     client.zrangebyscore(args, (zerr, zresponse) => {
       if (zerr) return reject(zerr);
-      // return resolve(response);
-      // console.log(zresponse);
       const result = [];
       (function get1MinHashes() {
         const record = zresponse.splice(0, 1)[0];
-        // console.log(record);
 
         // eslint-disable-next-line
         client.hgetall(`${bitmex1MinPrefix}:${record}`, (err, response) => {
@@ -57,23 +52,18 @@ DeltaDB.prototype.get1MinLast50 = function get1MinLast50() {
 
 DeltaDB.prototype.get5MinLast50 = function get5MinLast50() {
   return new Promise((resolve, reject) => {
-    // FIXME
     const endTime = new Date().getTime();
     const startTime = endTime - 15300000; // 51*5*60*1000 (255 minutes in millisecs)
-    // const startTime = '-inf';
-    // const endTime = '+inf';
     const args = [bitmex5MinPrefix, startTime, endTime];
-    // console.log(args);
 
     // eslint-disable-next-line
     client.zrangebyscore(args, (zerr, zresponse) => {
       if (zerr) return reject(zerr);
-      // return resolve(response);
-      // console.log(zresponse);
+
       const result = [];
+
       (function get5MinHashes() {
         const record = zresponse.splice(0, 1)[0];
-        // console.log(record);
 
         // eslint-disable-next-line
         client.hgetall(`${bitmex5MinPrefix}:${record}`, (err, response) => {
@@ -144,10 +134,6 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
       macd,
     } = args;
 
-    /* sma50,
-  sma100,
-  sma200,
-  ema9, */
     const timestamp = nixtime;
     const tvwap = vwap === null ? 'null' : utils.roundTo(vwap, config.significant);
 

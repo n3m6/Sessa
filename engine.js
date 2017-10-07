@@ -60,7 +60,6 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
 };
 
 Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(timestamp) {
-  // console.log(timestamp);
   db
     .getOneCandle(timestamp)
     .then(reply => this.processTrade(reply))
@@ -68,7 +67,6 @@ Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(timestamp) {
 };
 
 Engine.prototype.fiveMinuteProcessing = function fiveMinuteProcessing(timestamp) {
-  // console.log(timestamp);
   db
     .getFiveCandle(timestamp)
     .then(reply => this.processTrade(reply))
