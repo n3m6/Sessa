@@ -23,11 +23,29 @@ two pubsubs exist right now, 1 minute pubsub and 5 min pubsub
 use one or the other (but not both) for processing your trades
 */
 
+const pubsubOneMin = `${config.bitmex1MinPrefix}:pubsub`;
+
+pubsub.subscribe(pubsubOneMin);
+pubsub.on('message', (channel, message) => {
+  engine.oneMinuteProcessing(message);
+});
+
+/*
 const pubsubFiveMin = `${config.bitmex5MinPrefix}:pubsub`;
 
 pubsub.subscribe(pubsubFiveMin);
 pubsub.on('message', (channel, message) => {
   engine.fiveMinuteProcessing(message);
 });
+*/
+
+/*
+const pubsubFifteenMin = `${config.bitmex15MinPrefix}:pubsub`;
+
+pubsub.subscribe(pubsubFifteenMin);
+pubsub.on('message', (channel, message) => {
+  engine.fifteenMinuteProcessing(message);
+});
+*/
 
 // FIXME add client monitoring for order updates below, it should update redis when order changes
