@@ -133,6 +133,7 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
       trades,
       volume,
       vwap,
+      sma20,
       sma30,
       rsi,
       rsiavggain,
@@ -168,6 +169,8 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
       volume,
       'vwap',
       tvwap,
+      'sma20',
+      sma20,
       'sma30',
       sma30,
       'rsi',
@@ -192,7 +195,7 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
 
     const t = new Date(timestamp);
     const tTime = t.toISOString();
-    console.log(`${tTime}\t${open}\t${high}\t${low}\t${close}\t${trades}\t${volume}\t${sma30}\t${rsi}\t${macd}`);
+    console.log(`${tTime}\t${open}\t${high}\t${low}\t${close}\t${trades}\t${volume}\t${sma20}\t${sma30}\t${rsi}\t${macd}`);
 
     client
       .multi()
@@ -216,6 +219,7 @@ DeltaDB.prototype.insert5min = function insert5min(args) {
       closeFive,
       tradesFive,
       volumeFive,
+      sma20Five,
       sma30Five,
       rsiFive,
       rsigainFive,
@@ -244,6 +248,8 @@ DeltaDB.prototype.insert5min = function insert5min(args) {
       tradesFive,
       'volume',
       volumeFive,
+      'sma20',
+      sma20Five,
       'sma30',
       sma30Five,
       'rsi',
@@ -269,7 +275,7 @@ DeltaDB.prototype.insert5min = function insert5min(args) {
     const t = new Date(timestamp);
     const tTime = t.toISOString();
     console.log('----------- 5 min -----------');
-    console.log(`${tTime}\t${openFive}\t${highFive}\t${lowFive}\t${closeFive}\t${tradesFive}\t${volumeFive}\t${sma30Five}\t${rsiFive}\t${macdFive}`);
+    console.log(`${tTime}\t${openFive}\t${highFive}\t${lowFive}\t${closeFive}\t${tradesFive}\t${volumeFive}\t${sma20Five}\t${sma30Five}\t${rsiFive}\t${macdFive}`);
     console.log('-----------------------------');
 
     client
@@ -294,6 +300,7 @@ DeltaDB.prototype.insert15min = function insert15min(args) {
       closeFifteen,
       tradesFifteen,
       volumeFifteen,
+      sma20Fifteen,
       sma30Fifteen,
       rsiFifteen,
       rsigainFifteen,
@@ -307,7 +314,7 @@ DeltaDB.prototype.insert15min = function insert15min(args) {
     const timestamp = nixtime;
 
     const inargs = [
-      `${bitmex5MinPrefix}:${timestamp}`,
+      `${bitmex15MinPrefix}:${timestamp}`,
       'timestamp',
       timestamp,
       'open',
@@ -322,6 +329,8 @@ DeltaDB.prototype.insert15min = function insert15min(args) {
       tradesFifteen,
       'volume',
       volumeFifteen,
+      'sma20',
+      sma20Fifteen,
       'sma30',
       sma30Fifteen,
       'rsi',
@@ -347,7 +356,7 @@ DeltaDB.prototype.insert15min = function insert15min(args) {
     const t = new Date(timestamp);
     const tTime = t.toISOString();
     console.log('---------- 15 min -----------');
-    console.log(`${tTime}\t${openFifteen}\t${highFifteen}\t${lowFifteen}\t${closeFifteen}\t${tradesFifteen}\t${volumeFifteen}\t${sma30Fifteen}\t${rsiFifteen}\t${macdFifteen}`);
+    console.log(`${tTime}\t${openFifteen}\t${highFifteen}\t${lowFifteen}\t${closeFifteen}\t${tradesFifteen}\t${volumeFifteen}\t${sma20Fifteen}\t${sma30Fifteen}\t${rsiFifteen}\t${macdFifteen}`);
     console.log('-----------------------------');
 
     client

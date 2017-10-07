@@ -10,16 +10,11 @@ client.on('close', () => console.log('connection closed.'));
 client.on('initialize', () => console.log('initialized, waiting for data'));
 
 client.addStream('XBTUSD', 'tradeBin1m', data => deltaRecord.process(data));
-// client.addStream('XBTUSD', 'trade', data => deltaRecord.process(data));
-// FIXME send this data to the redis db
 
 /* TODO
 
 The delta server needs
-1. record the data in the redis db
-2. Calculate the macd, rsi, moving averages and store them in the db
-3. A cleanup function/ or cron job the prevents the db from growing
-4. alert the pubsub
+1. A cleanup function/ or cron job the prevents the db from growing
 
 all other clients will be monitoring the pubsub for delta updates
 
@@ -28,6 +23,6 @@ fields:
 timestamp, symbol,open, high, low, close, trades, volume, vwap,
 
 added fields:
-rsi, macd, sma30, sma50, sma100, sma200, ema9
+rsi, macd, sma20, sma30, sma50, sma100, sma200, ema9
 
 */
