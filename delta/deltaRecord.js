@@ -10,17 +10,17 @@ const DeltaRecord = function DeltaRecord() {
 const bitmex1MinPrefix = config.bitmex1MinPrefix; // eslint-disable-line
 
 function getHigh(data) {
-  let high = 0;
+  let high = 0.001;
   for (let i = 0; i < data.length; i += 1) {
-    high = data[i].high > high ? data[i].high : high;
+    if (data[i] !== null) high = data[i].high > high ? data[i].high : high;
   }
   return high;
 }
 
 function getLow(data) {
-  let low = data[0].low; // eslint-disable-line
+  let low = Number.MAX_SAFE_INTEGER; // eslint-disable-line
   for (let i = 0; i < data.length; i += 1) {
-    low = data[i].low < low ? data[i].low : low;
+    if (data[i] !== null) low = data[i].low < low ? data[i].low : low;
   }
   return low;
 }
@@ -28,7 +28,7 @@ function getLow(data) {
 function getTrades(data) {
   let trades = 0;
   for (let i = 0; i < data.length; i += 1) {
-    trades += parseInt(data[i].trades, 10);
+    if (data[i] !== null) trades += parseInt(data[i].trades, 10);
   }
   return trades;
 }
@@ -36,13 +36,14 @@ function getTrades(data) {
 function getVolume(data) {
   let volume = 0;
   for (let i = 0; i < data.length; i += 1) {
-    volume += parseInt(data[i].volume, 10);
+    if (data[i] !== null) volume += parseInt(data[i].volume, 10);
   }
   return volume;
 }
 
 function fiveMinuteProcessing(lastFive) {
-  const openFive = lastFive[0].open;
+  const openFive = lastFive[0] === null ? lastFive[1].open : lastFive[0].open;
+  // first element is null when we start on the exact 5 min mark
   const highFive = getHigh(lastFive);
   const lowFive = getLow(lastFive);
   const closeFive = lastFive[lastFive.length - 1].close;
@@ -118,7 +119,12 @@ DeltaRecord.prototype.process = function process(data) {
 
         // Processing trades at 5 min bins
         if (jsDate.getMinutes() % 5 === 0) {
+          // console.log('response');
+          // console.log(JSON.stringify(response));
           const lastFive = utils.arraySlice(4, response);
+          // console.log('array slice');
+          // console.log(JSON.stringify(lastFive));
+
           lastFive.push(args);
 
           // console.log(JSON.stringify(lastFive));
