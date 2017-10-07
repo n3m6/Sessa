@@ -19,7 +19,7 @@ pubsub.on('error', (err) => {
 engine.init();
 
 /*
-two pubsubs exist right now, 1 minute pubsub and 5 min pubsub
+three pubsubs exist right now, 1 min pubsub, 5 min pubsub & 15 min pubsub
 use one or the other (but not both) for processing your trades
 */
 
