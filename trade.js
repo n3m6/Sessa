@@ -28,13 +28,13 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, ca
         this.setStopLoss(orderType, response.body.orderID, orderSize, currentPrice);
         callback(response.body.orderID);
       }))
-    .catch(response => console.log(response));
+    .catch(response => console.log(response.body));
 };
 
 Trade.prototype.closePosition = function closePosition(orderID) {
-  bm.closePosition(orderID).catch(response => console.log(response));
+  bm.closePosition(orderID).catch(response => console.log(response.body));
   // FIXME if the stop loss trigger is still in the db
-  bm.deleteUOrder(orderID).catch(response => console.log(response));
+  bm.deleteUOrder(orderID).catch(response => console.log(response.body));
 };
 
 function calculateStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {

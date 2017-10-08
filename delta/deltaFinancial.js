@@ -15,13 +15,14 @@ DeltaFinancial.prototype.sma = function sma(data, range, currClose) {
 };
 
 DeltaFinancial.prototype.rsi = function rsi(data, range, current) {
-  if (data.length < range) return [1, 1, 1]; // ignore first part
+  if (data.length + 1 < range) return [1, 1, 1]; // ignore first part
 
   // FIXME this could be
-  if (data.length === range) {
+  if (data.length + 1 === range) {
     const tmp = data.slice(); // lmao copy array not create another reference
     tmp.push(current);
-    const candles = utils.arraySlice(tmp, data);
+    const candles = utils.arraySlice(range, tmp);
+
     const gains = candles.filter(elem => elem.close > elem.open);
     let totalGains = 0;
     for (let i = 0; i < gains.length; i += 1) {
@@ -42,8 +43,8 @@ DeltaFinancial.prototype.rsi = function rsi(data, range, current) {
 
     let rsitmp = 100 - iRS;
 
-    avggain = utils.roundTo(avggain, config.significant);
-    avgloss = utils.roundTo(avgloss, config.significant);
+    avggain = utils.roundTo(avggain, 8);
+    avgloss = utils.roundTo(avgloss, 8);
     rsitmp = utils.roundTo(rsitmp, config.significant);
 
     return [avggain, avgloss, rsitmp];
@@ -62,13 +63,17 @@ DeltaFinancial.prototype.rsi = function rsi(data, range, current) {
   let avggain = (prevGain + currentGain) / range;
   const prevLoss = lastCandle.rsiavgloss * (range - 1);
   let avgloss = (prevLoss + currentLoss) / range;
+  // console.log(`avggain: ${avggain}\t avgloss: ${avgloss}`);
 
-  const RS = prevGain / prevLoss;
+  avggain = avggain === 0 ? 0.01 : avggain; // prevent divide by zero
+  avgloss = avgloss === 0 ? 0.01 : avgloss;
+
+  const RS = avggain / avgloss;
   const iRS = 100 / (1 + RS);
 
   let rsitmp = 100 - iRS;
-  avggain = utils.roundTo(avggain, config.significant);
-  avgloss = utils.roundTo(avgloss, config.significant);
+  avggain = utils.roundTo(avggain, 8);
+  avgloss = utils.roundTo(avgloss, 8);
   rsitmp = utils.roundTo(rsitmp, config.significant);
 
   return [avggain, avgloss, rsitmp];
@@ -110,3 +115,46 @@ DeltaFinancial.prototype.macd = function macd(data, range1, range2, signalRange,
 };
 
 exports.DeltaFinancial = new DeltaFinancial();
+/*
+const df = new DeltaFinancial();
+const prices = [
+  { open: 4598, close: 4600.65 },
+  { open: 4600.65, close: 4486.18 },
+  { open: 4486.18, close: 4513.98 },
+  { open: 4513.98, close: 4525.03 },
+  { open: 4525.03, close: 4551.17 },
+  { open: 4551.17, close: 4614.84 },
+  { open: 4614.84, close: 4569.56 },
+  { open: 4569.56, close: 4548.71 },
+  { open: 4548.71, close: 4376.55 },
+  { open: 4376.55, close: 4393.08 },
+  { open: 4393.08, close: 4379.44 },
+  { open: 4379.44, close: 4379.07 },
+  { open: 4379.07, close: 4190.12 },
+  { open: 4190.12, close: 4233.3 },
+  { open: 4233.3, close: 4350.03 },
+  { open: 4350.03, close: 4148.34 },
+  { open: 4148.34, close: 4089.26 },
+  { open: 4089.26, close: 4190.46 },
+  { open: 4190.46, close: 4324.12 },
+  { open: 4324.12, close: 4310.33 },
+  { open: 4310.33, close: 4429.59 },
+  { open: 4429.59, close: 4447.13 },
+  { open: 4447.13, close: 4493.4 },
+  { open: 4493.4, close: 4443.14 },
+  { open: 4443.14, close: 4548.06 },
+  { open: 4548.06, close: 4582.83 },
+  { open: 4582.83, close: 4574.68 },
+  { open: 4574.68, close: 4628.96 },
+];
+
+for (let i = 0; i < prices.length; i += 1) {
+  const priceSlice = prices.slice(0, i);
+  const current = prices[i];
+
+  const [gain, loss, rsi] = df.rsi(priceSlice, 14, current);
+  prices[i].rsiavggain = gain;
+  prices[i].rsiavgloss = loss;
+  console.log(`open: ${current.open}\tclose: ${current.close}\trsi: ${rsi}`);
+}
+*/
