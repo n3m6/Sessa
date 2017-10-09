@@ -1,27 +1,60 @@
 // const config = require('./config');
-const OrderMonitor = function OrderMonitor() {
-  this.lastid = 0;
-};
+const db = require('./db').Db;
+
+const OrderMonitor = function OrderMonitor() {};
 
 OrderMonitor.prototype.monitor = function monitor(data) {
   // loop through all the recent updates
   if (data.length > 0) {
-    console.log(data.length);
-    // console.log(data);
-    for (let i = this.lastid; i < data.length; i += 1) {
-      const curr = i;
+    const curr = data[data.length - 1];
 
-      console.log(`${curr}\t${data[curr].side}\t${data[curr].orderQty}\t${data[curr].price}\t${data[curr]
-        .ordType}\t${data[curr].ordStatus}\t\t${data[curr].avgPx}\t${data[curr].orderID}\t${data[
-        curr
-      ].clOrdID}`);
+    const {
+      orderID,
+      clOrdID,
+      // clOrdLinkID,
+      // account,
+      // symbol,
+      side,
+      // simpleOrderQty,
+      orderQty,
+      price,
+      // displayQty,
+      // stopPx,
+      // pegOffsetValue,
+      // pegPriceType,
+      // currency,
+      // settlCurrency,
+      ordType,
+      // timeInForce,
+      // execInst,
+      // contingencyType,
+      // exDestination,
+      ordStatus,
+      // triggered,
+      // workingIndicator,
+      // ordRejReason,
+      // simpleLeavesQty,
+      // leavesQty,
+      // simpleCumQty,
+      // cumQty,
+      avgPx,
+      // multiLegReportingType,
+      // text,
+      // transactTime,
+      timestamp,
+    } = curr;
+    // console.log(`${timestamp}\t${side}\t${price}\t${orderQty}\t${avgPx}\t${ordType}\t${ordStatus}\t${orderID}\t${clOrdID}`);
 
-      if (data[curr].ordType === 'Stop' && data[curr].ordStatus === 'Filled') {
-        console.log('Stop triggered');
-      }
+    if (ordType === 'Stop' && ordStatus === 'Filled') {
+      console.log('----------- CLOSING POSITION -----------');
+      console.log('Reason: STOP Triggered');
+      db
+        .setActiveTrade('false')
+        .then(db.setOrderType(''))
+        .then(console.log('----------------------------------------'))
+        .catch(reply => console.log(`error ending trade${reply}`));
     }
   }
-  // this.lastid = data.length - 1;
 };
 
 exports.OrderMonitor = new OrderMonitor();

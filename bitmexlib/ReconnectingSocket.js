@@ -4,6 +4,7 @@ const WebSocket = require('ws');
 const WebSocketClient = function WebSocketClient() {
   this.autoReconnectInterval = 5000; // ms
   this.logConnection = true;
+  this.alive = true;
 };
 
 WebSocketClient.prototype.open = function open(url) {
@@ -16,8 +17,26 @@ WebSocketClient.prototype.open = function open(url) {
   });
 
   this.instance.on('message', (data, flags) => {
-    this.onmessage(data, flags);
+    // check if the message was a pong message
+    if (data === 'pong') {
+      this.alive = true;
+    } else {
+      this.onmessage(data, flags);
+    }
   });
+
+  // PING
+  const that = this;
+  setInterval(() => {
+    if (this.alive === false) {
+      // handle connection issue here
+      console.error('Ping failed. Reconnecting...');
+      this.reconnect(1006);
+    }
+    // console.log('pinging...');
+    this.alive = false; // if ping is received it will change this to true
+    that.instance.send('ping');
+  }, 30000);
 
   this.instance.on('close', (code) => {
     let reconnecting = false;
@@ -126,8 +145,8 @@ WebSocketClient.prototype.open = function open(url) {
 
 // Forward eventemitter methods
 ['on', 'off', 'once', 'addListener', 'removeListener', 'emit'].forEach((key) => {
-  WebSocketClient.prototype[key] = function (...args) {
-    // this.instance[key].apply(this.instance, arguments); // eslint-disable-line
+  // eslint-disable-next-line
+  WebSocketClient.prototype[key] = function(...args) {
     this.instance[key](...args);
   };
 });

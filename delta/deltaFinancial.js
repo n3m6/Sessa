@@ -115,7 +115,11 @@ DeltaFinancial.prototype.macd = function macd(data, range1, range2, signalRange,
 };
 
 exports.DeltaFinancial = new DeltaFinancial();
+
 /*
+
+// KEEP THIS FOR TESTING RSI
+
 const df = new DeltaFinancial();
 const prices = [
   { open: 4598, close: 4600.65 },
