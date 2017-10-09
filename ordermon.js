@@ -1,4 +1,6 @@
 // const config = require('./config');
+const db = require('./db').Db;
+
 const OrderMonitor = function OrderMonitor() {};
 
 OrderMonitor.prototype.monitor = function monitor(data) {
@@ -41,9 +43,17 @@ OrderMonitor.prototype.monitor = function monitor(data) {
       // transactTime,
       timestamp,
     } = curr;
-    console.log(`${timestamp}\t${side}\t${price}\t${orderQty}\t${avgPx}\t${ordType}\t${ordStatus}\t${orderID}\t${clOrdID}`);
+    // console.log(`${timestamp}\t${side}\t${price}\t${orderQty}\t${avgPx}\t${ordType}\t${ordStatus}\t${orderID}\t${clOrdID}`);
 
-    if (ordType === 'Stop' && ordStatus === 'Filled') console.log('Stop triggered');
+    if (ordType === 'Stop' && ordStatus === 'Filled') {
+      console.log('----------- CLOSING POSITION -----------');
+      console.log('Reason: STOP Triggered');
+      db
+        .setActiveTrade('false')
+        .then(db.setOrderType(''))
+        .then(console.log('----------------------------------------'))
+        .catch(reply => console.log(`error ending trade${reply}`));
+    }
   }
 };
 

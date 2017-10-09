@@ -1,4 +1,6 @@
 // const config = require('./config');
+const db = require('./db').Db;
+
 const PositionMonitor = function PositionMonitor() {};
 
 PositionMonitor.prototype.monitor = function monitor(data) {
@@ -101,15 +103,27 @@ PositionMonitor.prototype.monitor = function monitor(data) {
       // lastValue,
     } = curr;
 
+    /*
     if (isOpen) {
       console.log(`Entry price: ${avgEntryPrice}\tLiquidation price: ${liquidationPrice}`);
     }
+    */
 
     if (posState === 'Deleverage') {
-      console.log('Position Deleveraged');
+      console.log('!!!! WARNING: Position Deleveraged !!!!');
+      db
+        .setActiveTrade('false')
+        .then(db.setOrderType(''))
+        .then(console.log('----------------------------------------'))
+        .catch(reply => console.log(`error ending trade${reply}`));
     }
     if (posState === 'Liquidation') {
-      console.log('Position Liquidated');
+      console.log('!!!! WARNING: Position Liquidated !!!!');
+      db
+        .setActiveTrade('false')
+        .then(db.setOrderType(''))
+        .then(console.log('----------------------------------------'))
+        .catch(reply => console.log(`error ending trade${reply}`));
     }
   }
 };

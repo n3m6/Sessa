@@ -26,15 +26,19 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
         // check whether we should end the trade
         db.getOrderType().then((orderType) => {
           console.log(`Active Trade ${tTime.toISOString()} ${orderType} ${close} ${sma30}`);
+
           if (strategy.threeGreenExit(close, sma20, orderType)) {
-            console.log(`Close signal ${tTime.toISOString()} ${close} ${sma30}`);
             console.log('----------- CLOSING POSITION -----------');
+            console.log(`Time: ${tTime.toISOString()}`);
+            console.log(`Reason: Exit Signal (price ${close} sma ${sma20}`);
+
             db
               .setActiveTrade('false')
               .then(db.setOrderType(''))
               .then(db.getOrderID().then((orderID) => {
                 trade.closePosition(orderID);
               }))
+              .then(console.log('----------------------------------------'))
               .catch(reply => console.log(`error ending trade${reply}`));
           }
         });

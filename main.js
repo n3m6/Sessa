@@ -32,14 +32,14 @@ engine.init();
 three pubsubs exist right now, 1 min pubsub, 5 min pubsub & 15 min pubsub
 use one or the other (but not both) for processing your trades
 */
-
+/*
 const pubsubOneMin = `${config.bitmex1MinPrefix}:pubsub`;
 
 pubsub.subscribe(pubsubOneMin);
 pubsub.on('message', (channel, message) => {
   engine.oneMinuteProcessing(message);
 });
-
+*/
 /*
 const pubsubFiveMin = `${config.bitmex5MinPrefix}:pubsub`;
 
@@ -49,13 +49,12 @@ pubsub.on('message', (channel, message) => {
 });
 */
 
-/* const pubsubFifteenMin = `${config.bitmex15MinPrefix}:pubsub`;
+const pubsubFifteenMin = `${config.bitmex15MinPrefix}:pubsub`;
 
 pubsub.subscribe(pubsubFifteenMin);
 pubsub.on('message', (channel, message) => {
   engine.fifteenMinuteProcessing(message);
 });
-*/
 
 // Order Monitoring (will trigger stop losses)
 client.addStream('XBTUSD', 'order', data => omonitor.monitor(data));
