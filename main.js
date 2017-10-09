@@ -40,22 +40,22 @@ pubsub.on('message', (channel, message) => {
   engine.oneMinuteProcessing(message);
 });
 */
-/*
+
 const pubsubFiveMin = `${config.bitmex5MinPrefix}:pubsub`;
 
 pubsub.subscribe(pubsubFiveMin);
 pubsub.on('message', (channel, message) => {
   engine.fiveMinuteProcessing(message);
 });
-*/
 
+/*
 const pubsubFifteenMin = `${config.bitmex15MinPrefix}:pubsub`;
 
 pubsub.subscribe(pubsubFifteenMin);
 pubsub.on('message', (channel, message) => {
   engine.fifteenMinuteProcessing(message);
 });
-
+*/
 // Order Monitoring (will trigger stop losses)
 client.addStream('XBTUSD', 'order', data => omonitor.monitor(data));
 client.addStream('XBTUSD', 'position', data => pmonitor.monitor(data));
