@@ -3,6 +3,7 @@ const config = require('./config');
 const engine = require('./engine').Engine;
 const BitmexClient = require('./bitmexlib/bitmexlib.js');
 const omonitor = require('./ordermon.js').OrderMonitor;
+const pmonitor = require('./positionmon.js').PositionMonitor;
 
 const { port, host } = config.redis;
 const pubsub = redis.createClient(port, host, { no_ready_check: true });
@@ -56,6 +57,6 @@ pubsub.on('message', (channel, message) => {
 });
 */
 
-// FIXME fix bitmex library to use heartbeats to keep the connection alive
 // Order Monitoring (will trigger stop losses)
 client.addStream('XBTUSD', 'order', data => omonitor.monitor(data));
+client.addStream('XBTUSD', 'position', data => pmonitor.monitor(data));
