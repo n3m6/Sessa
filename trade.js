@@ -24,10 +24,13 @@ Trade.prototype.determineOrderQty = function determineOrderQty(price, atr, order
       diff = priceXBT - stopXBT;
       lossVal = diff * stopLossPosition;
       allocation = Math.round(absLoss / lossVal);
+      const maxAlloc = Math.round(config.margin * config.maxBetSize * balance);
+      allocation = allocation > maxAlloc ? maxAlloc : allocation;
       console.log(`Stop Loss Position: ${stopLossPosition}`);
       console.log(`Absolute Loss: ${absLoss}`);
       console.log(`Loss Value (XBT): ${lossVal}`);
       console.log(`Allocation: ${allocation}`);
+      console.log(`Balance % Used: ${allocation / (balance * config.margin)})`);
     } else {
       stopLossPosition = price + atrk;
       absLoss = absLoss * balance * config.maxLoss;
@@ -35,10 +38,13 @@ Trade.prototype.determineOrderQty = function determineOrderQty(price, atr, order
       diff = stopXBT - priceXBT;
       lossVal = diff * stopLossPosition;
       allocation = Math.round(absLoss / lossVal);
+      const maxAlloc = Math.round(config.margin * config.maxBetSize * balance);
+      allocation = allocation > maxAlloc ? maxAlloc : allocation;
       console.log(`Stop Loss Position: ${stopLossPosition}`);
       console.log(`Absolute Loss: ${absLoss}`);
       console.log(`Loss Value (XBT): ${lossVal}`);
       console.log(`Allocation: ${allocation}`);
+      console.log(`Balance % Used: ${allocation / (balance * config.margin)})`);
     }
 
     if (price === 0 || balance < 1) return reject();
