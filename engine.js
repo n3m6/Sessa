@@ -15,7 +15,7 @@ Engine.prototype.setOrderID = function setOrderID(orderID) {
 
 Engine.prototype.processTrade = function processTrade(lastCandle) {
   // eslint-disable-next-line
-  const [timestamp, open, high, low, close, sma20, sma30, rsi, macd] = lastCandle;
+  const [timestamp, open, high, low, close, sma20, sma30, rsi, macd, tr, atr] = lastCandle;
 
   const tTime = new Date(parseInt(timestamp, 10));
 
@@ -55,7 +55,7 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
           db
             .setActiveTrade(at)
             .then(db.setOrderType(ot))
-            .then(trade.openPosition(ot, close, this.setOrderID))
+            .then(trade.openPosition(ot, close, atr, this.setOrderID))
             .catch(reply => console.log(`error while checking for entry signal${reply}`));
         }
       }

@@ -3,13 +3,46 @@ const bm = require('./bitmex').BitMEX;
 
 const Trade = function Trade() {};
 
-Trade.prototype.determineOrderQty = function determineOrderQty(price, balance) {
+Trade.prototype.determineOrderQty = function determineOrderQty(price, atr, orderType, balance) {
   return new Promise((resolve, reject) => {
-    const toXBT = balance / 100000000;
-    const dollarValue = price * toXBT;
-    const bet = Math.round(dollarValue * config.margin * config.betSize);
+    // const toXBT = balance / 100000000;
+    // const dollarValue = price * toXBT;
+    // const bet = Math.round(dollarValue * config.margin * config.betSize);
+    const atrk = config.atrmultiplier * atr;
+    let stopLossPosition = 1;
+    let absLoss = -1;
+    let lossVal = 1;
+    const priceXBT = 1 / price;
+    let stopXBT = 1;
+    let diff = 1;
+    let allocation = 1;
+
+    if (orderType === 'LONG') {
+      stopLossPosition = price - atrk;
+      absLoss = absLoss * balance * config.maxLoss;
+      stopXBT = 1 / stopLossPosition;
+      diff = priceXBT - stopXBT;
+      lossVal = diff * stopLossPosition;
+      allocation = Math.round(absLoss / lossVal);
+      console.log(`Stop Loss Position: ${stopLossPosition}`);
+      console.log(`Absolute Loss: ${absLoss}`);
+      console.log(`Loss Value (XBT): ${lossVal}`);
+      console.log(`Allocation: ${allocation}`);
+    } else {
+      stopLossPosition = price + atrk;
+      absLoss = absLoss * balance * config.maxLoss;
+      stopXBT = 1 / stopLossPosition;
+      diff = stopXBT - priceXBT;
+      lossVal = diff * stopLossPosition;
+      allocation = Math.round(absLoss / lossVal);
+      console.log(`Stop Loss Position: ${stopLossPosition}`);
+      console.log(`Absolute Loss: ${absLoss}`);
+      console.log(`Loss Value (XBT): ${lossVal}`);
+      console.log(`Allocation: ${allocation}`);
+    }
+
     if (price === 0 || balance < 1) return reject();
-    return resolve(bet);
+    return resolve(allocation);
   });
 };
 
@@ -17,15 +50,20 @@ Trade.prototype.init = function init() {
   bm.adjustMargin(config.margin);
 };
 
-Trade.prototype.openPosition = function openPosition(orderType, currentPrice, callback) {
+Trade.prototype.openPosition = function openPosition(
+  orderType,
+  currentPrice,
+  avgTrueRange,
+  callback,
+) {
   const side = orderType === 'LONG' ? 'Buy' : 'Sell';
   bm
     .getBalance()
-    .then(balance => this.determineOrderQty(currentPrice, balance))
+    .then(balance => this.determineOrderQty(currentPrice, avgTrueRange, orderType, balance))
     .then(orderSize =>
       bm.marketOrder(side, orderSize).then((response) => {
         // console.log('setting stop loss');
-        this.setStopLoss(orderType, response.body.orderID, orderSize, currentPrice);
+        this.setStopLoss(orderType, response.body.orderID, orderSize, currentPrice, avgTrueRange);
         callback(response.body.orderID);
       }))
     .catch(response => console.log(response.body));
@@ -37,7 +75,8 @@ Trade.prototype.closePosition = function closePosition(orderID) {
   bm.deleteUOrder(orderID).catch(response => console.log(response.body));
 };
 
-function calculateStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {
+/*
+function calculateFixedStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {
   const accValue = marginAllocation / margin;
   const loss = accValue * maxLoss;
   const highWater = marginAllocation - loss; // maximum margin loss
@@ -53,10 +92,21 @@ function calculateStopLoss(side, lastPrice, margin, maxLoss, marginAllocation) {
   }
   return 0;
 }
+*/
 
-Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, lastPrice) {
+function calculateVarStopLoss(side, lastPrice, atr) {
+  const atrk = atr * config.atrmultiplier;
+
+  if (side === 'LONG') {
+    return lastPrice - atrk;
+  }
+  // else
+  return lastPrice + atrk;
+}
+
+Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, lastPrice, atr) {
   // stop Price should be a rounded integer for BitMEX
-  const stopPrice = calculateStopLoss(side, lastPrice, config.margin, config.maxLoss, orderQty);
+  const stopPrice = calculateVarStopLoss(side, lastPrice, atr);
   console.log(`StopPrice: ${stopPrice}`);
   bm
     .setUStopLoss(side, stopPrice, orderID)
