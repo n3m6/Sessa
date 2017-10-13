@@ -68,12 +68,15 @@ Trade.prototype.openPosition = function openPosition(
   avgTrueRange,
   callback,
 ) {
+  // FIXME this should be a promise function
   const side = orderType === 'LONG' ? 'Buy' : 'Sell';
   bm
     .getBalance()
     .then(balance => this.determineOrderQty(currentPrice, avgTrueRange, orderType, balance))
     .then(orderSize =>
       bm.marketOrder(side, orderSize).then((response) => {
+        // FIXME this does't detect failed market orders
+        // Maybe deleverage and try again?
         // console.log('setting stop loss');
         this.setStopLoss(orderType, response.body.orderID, orderSize, currentPrice, avgTrueRange);
         callback(response.body.orderID);

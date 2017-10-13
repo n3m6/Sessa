@@ -54,6 +54,7 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
         if (at === true) {
           console.log('----------- OPENING POSITION -----------');
           console.log(`Opening ${tTime.toISOString()} ${ot} ${close}`);
+          // FIXME this should be re-ordered. open-position then set active trade
           db
             .setActiveTrade(at)
             .then(db.setOrderType(ot))
