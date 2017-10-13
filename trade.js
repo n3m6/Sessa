@@ -1,5 +1,6 @@
 const config = require('./config');
 const bm = require('./bitmex').BitMEX;
+const utils = require('./utils');
 
 const Trade = function Trade() {};
 
@@ -8,43 +9,48 @@ Trade.prototype.determineOrderQty = function determineOrderQty(price, atr, order
     // const toXBT = balance / 100000000;
     // const dollarValue = price * toXBT;
     // const bet = Math.round(dollarValue * config.margin * config.betSize);
-    const atrk = config.atrmultiplier * atr;
+
+    const balxbt = balance / 100000000;
+    const bal = balxbt * price;
+    console.log(`Balance: ${utils.roundTo(bal, 2)}`);
+    const atrk = config.atrmultiplier * parseFloat(atr);
+    console.log(`ATR: ${utils.roundTo(atr, 2)}`);
     let stopLossPosition = 1;
     let absLoss = -1;
     let lossVal = 1;
-    const priceXBT = 1 / price;
+    const priceXBT = 1 / parseFloat(price);
     let stopXBT = 1;
     let diff = 1;
     let allocation = 1;
 
     if (orderType === 'LONG') {
-      stopLossPosition = price - atrk;
-      absLoss = absLoss * balance * config.maxLoss;
+      stopLossPosition = Math.round(parseFloat(price) - atrk);
+      absLoss = absLoss * bal * config.maxLoss;
       stopXBT = 1 / stopLossPosition;
       diff = priceXBT - stopXBT;
       lossVal = diff * stopLossPosition;
       allocation = Math.round(absLoss / lossVal);
-      const maxAlloc = Math.round(config.margin * config.maxBetSize * balance);
+      const maxAlloc = Math.round(config.margin * config.maxBetSize * bal);
       allocation = allocation > maxAlloc ? maxAlloc : allocation;
       console.log(`Stop Loss Position: ${stopLossPosition}`);
       console.log(`Absolute Loss: ${absLoss}`);
-      console.log(`Loss Value (XBT): ${lossVal}`);
       console.log(`Allocation: ${allocation}`);
-      console.log(`Balance % Used: ${allocation / (balance * config.margin)})`);
+      const balpercent = allocation / (bal * config.margin);
+      console.log(`Balance % Used: ${utils.roundTo(balpercent * 100, 2)}%`);
     } else {
-      stopLossPosition = price + atrk;
-      absLoss = absLoss * balance * config.maxLoss;
+      stopLossPosition = Math.round(parseFloat(price) + atrk);
+      absLoss = absLoss * bal * config.maxLoss;
       stopXBT = 1 / stopLossPosition;
       diff = stopXBT - priceXBT;
       lossVal = diff * stopLossPosition;
       allocation = Math.round(absLoss / lossVal);
-      const maxAlloc = Math.round(config.margin * config.maxBetSize * balance);
+      const maxAlloc = Math.round(config.margin * config.maxBetSize * bal);
       allocation = allocation > maxAlloc ? maxAlloc : allocation;
       console.log(`Stop Loss Position: ${stopLossPosition}`);
       console.log(`Absolute Loss: ${absLoss}`);
-      console.log(`Loss Value (XBT): ${lossVal}`);
       console.log(`Allocation: ${allocation}`);
-      console.log(`Balance % Used: ${allocation / (balance * config.margin)})`);
+      const balpercent = allocation / (bal * config.margin);
+      console.log(`Balance % Used: ${utils.roundTo(balpercent * 100, 2)}%`);
     }
 
     if (price === 0 || balance < 1) return reject();
@@ -101,13 +107,13 @@ function calculateFixedStopLoss(side, lastPrice, margin, maxLoss, marginAllocati
 */
 
 function calculateVarStopLoss(side, lastPrice, atr) {
-  const atrk = atr * config.atrmultiplier;
+  const atrk = parseFloat(atr) * config.atrmultiplier;
 
   if (side === 'LONG') {
-    return lastPrice - atrk;
+    return Math.round(parseFloat(lastPrice) - atrk);
   }
   // else
-  return lastPrice + atrk;
+  return Math.round(parseFloat(lastPrice) + atrk);
 }
 
 Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, lastPrice, atr) {

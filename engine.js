@@ -18,6 +18,8 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
   const [timestamp, open, high, low, close, sma20, sma30, rsi, macd, tr, atr] = lastCandle;
 
   const tTime = new Date(parseInt(timestamp, 10));
+  // console.log(`ATR: ${atr}`);
+  // console.log(lastCandle);
 
   db
     .getActiveTrade() // check if there's an active trade in the db
