@@ -4,7 +4,7 @@ const df = require('./deltaFinancial.js').DeltaFinancial;
 const utils = require('../utils');
 
 const DeltaRecord = function DeltaRecord() {
-  console.log('TIME\t\t\t\tOPEN\tHIGH\tLOW\tCLOSE\tTRADES\tVOL\tSMA20\tSMA30\tRSI\tMACD');
+  console.log('TIME\t\t\t\tOPEN\tHIGH\tLOW\tCLOSE\tTRADES\tVOL\tSMA20\tSMA30\tRSI\tMACD\tTR\tATR');
 };
 
 const bitmex1MinPrefix = config.bitmex1MinPrefix; // eslint-disable-line
@@ -108,6 +108,9 @@ DeltaRecord.prototype.process = function process(data) {
           config.macd.signal,
           lastCandle,
         );
+        const [ttr, tatr] = df.avgTrueRange(response, config.atr, lastCandle);
+        const tr = utils.roundTo(ttr, 4);
+        const atr = utils.roundTo(tatr, 4);
 
         const args = {
           nixtime,
@@ -127,6 +130,8 @@ DeltaRecord.prototype.process = function process(data) {
           mema26,
           msignal,
           macd,
+          tr,
+          atr,
         };
         // insert into db
         db.insert1min(args).catch(console.error);
@@ -171,6 +176,9 @@ DeltaRecord.prototype.process = function process(data) {
                 config.macd.signal,
                 lastCandleFive,
               );
+              const [ttr5, tatr5] = df.avgTrueRange(responseFive, config.atr, lastCandleFive);
+              const trFive = utils.roundTo(ttr5, 4);
+              const atrFive = utils.roundTo(tatr5, 4);
 
               const fiveArgs = {
                 nixtime,
@@ -189,6 +197,8 @@ DeltaRecord.prototype.process = function process(data) {
                 mema26Five,
                 msignalFive,
                 macdFive,
+                trFive,
+                atrFive,
               };
               // insert data
               db.insert5min(fiveArgs).catch(console.error);
@@ -235,6 +245,13 @@ DeltaRecord.prototype.process = function process(data) {
                 config.macd.signal,
                 lastCandleFifteen,
               );
+              const [ttr15, tatr15] = df.avgTrueRange(
+                responseFifteen,
+                config.atr,
+                lastCandleFifteen,
+              );
+              const trFifteen = utils.roundTo(ttr15, 4);
+              const atrFifteen = utils.roundTo(tatr15, 4);
 
               const fifteenArgs = {
                 nixtime,
@@ -253,6 +270,8 @@ DeltaRecord.prototype.process = function process(data) {
                 mema26Fifteen,
                 msignalFifteen,
                 macdFifteen,
+                trFifteen,
+                atrFifteen,
               };
               // insert data
               db.insert15min(fifteenArgs).catch(console.error);

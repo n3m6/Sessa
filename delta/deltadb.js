@@ -132,6 +132,8 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
       mema26,
       msignal,
       macd,
+      tr,
+      atr,
     } = args;
 
     const timestamp = nixtime;
@@ -173,6 +175,10 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
       msignal,
       'macd',
       macd,
+      'tr',
+      tr,
+      'atr',
+      atr,
     ];
     // args for sorted set
     const zargs = [`${bitmex1MinPrefix}`, `${timestamp}`, timestamp];
@@ -181,7 +187,7 @@ DeltaDB.prototype.insert1min = function insert1Min(args) {
 
     const t = new Date(timestamp);
     const tTime = t.toISOString();
-    console.log(`${tTime}\t${open}\t${high}\t${low}\t${close}\t${trades}\t${volume}\t${sma20}\t${sma30}\t${rsi}\t${macd}`);
+    console.log(`${tTime}\t${open}\t${high}\t${low}\t${close}\t${trades}\t${volume}\t${sma20}\t${sma30}\t${rsi}\t${macd}\t${tr}\t${atr}`);
 
     client
       .multi()
@@ -214,6 +220,8 @@ DeltaDB.prototype.insert5min = function insert5min(args) {
       mema26Five,
       msignalFive,
       macdFive,
+      trFive,
+      atrFive,
     } = args;
 
     const timestamp = nixtime;
@@ -252,6 +260,10 @@ DeltaDB.prototype.insert5min = function insert5min(args) {
       msignalFive,
       'macd',
       macdFive,
+      'tr',
+      trFive,
+      'atr',
+      atrFive,
     ];
     // args for sorted set
     const zargs = [`${bitmex5MinPrefix}`, `${timestamp}`, timestamp];
@@ -261,7 +273,7 @@ DeltaDB.prototype.insert5min = function insert5min(args) {
     const t = new Date(timestamp);
     const tTime = t.toISOString();
     console.log('----------- 5 min -----------');
-    console.log(`${tTime}\t${openFive}\t${highFive}\t${lowFive}\t${closeFive}\t${tradesFive}\t${volumeFive}\t${sma20Five}\t${sma30Five}\t${rsiFive}\t${macdFive}`);
+    console.log(`${tTime}\t${openFive}\t${highFive}\t${lowFive}\t${closeFive}\t${tradesFive}\t${volumeFive}\t${sma20Five}\t${sma30Five}\t${rsiFive}\t${macdFive}\t${trFive}\t${atrFive}`);
     console.log('-----------------------------');
 
     client
@@ -295,6 +307,8 @@ DeltaDB.prototype.insert15min = function insert15min(args) {
       mema26Fifteen,
       msignalFifteen,
       macdFifteen,
+      trFifteen,
+      atrFifteen,
     } = args;
 
     const timestamp = nixtime;
@@ -333,6 +347,10 @@ DeltaDB.prototype.insert15min = function insert15min(args) {
       msignalFifteen,
       'macd',
       macdFifteen,
+      'tr',
+      trFifteen,
+      'atr',
+      atrFifteen,
     ];
     // args for sorted set
     const zargs = [`${bitmex15MinPrefix}`, `${timestamp}`, timestamp];
@@ -342,7 +360,7 @@ DeltaDB.prototype.insert15min = function insert15min(args) {
     const t = new Date(timestamp);
     const tTime = t.toISOString();
     console.log('---------- 15 min -----------');
-    console.log(`${tTime}\t${openFifteen}\t${highFifteen}\t${lowFifteen}\t${closeFifteen}\t${tradesFifteen}\t${volumeFifteen}\t${sma20Fifteen}\t${sma30Fifteen}\t${rsiFifteen}\t${macdFifteen}`);
+    console.log(`${tTime}\t${openFifteen}\t${highFifteen}\t${lowFifteen}\t${closeFifteen}\t${tradesFifteen}\t${volumeFifteen}\t${sma20Fifteen}\t${sma30Fifteen}\t${rsiFifteen}\t${macdFifteen}\t${trFifteen}\t${atrFifteen}`);
     console.log('-----------------------------');
 
     client

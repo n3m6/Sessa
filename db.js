@@ -88,6 +88,8 @@ Db.prototype.getOneCandle = function getOneCandle(timestamp) {
       'sma30',
       'rsi',
       'macd',
+      'tr',
+      'atr',
     ];
     client.hmget(args, (err, reply) => {
       if (err) return reject(err);
@@ -110,6 +112,8 @@ Db.prototype.getFiveCandle = function getFiveCandle(timestamp) {
       'sma30',
       'rsi',
       'macd',
+      'tr',
+      'atr',
     ];
     client.hmget(args, (err, reply) => {
       if (err) return reject(err);
@@ -132,6 +136,8 @@ Db.prototype.getFifteenCandle = function getFifteenCandle(timestamp) {
       'sma30',
       'rsi',
       'macd',
+      'tr',
+      'atr',
     ];
     client.hmget(args, (err, reply) => {
       if (err) return reject(err);

@@ -102,6 +102,7 @@ BitMEX.prototype.closePosition = function closePosition(orderId) {
       .header(headers)
       .send(postBody)
       .end((response) => {
+        // FIXME doesn't detect error from API
         if (response.code === 200) {
           return resolve(response);
         }

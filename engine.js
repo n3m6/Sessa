@@ -15,9 +15,11 @@ Engine.prototype.setOrderID = function setOrderID(orderID) {
 
 Engine.prototype.processTrade = function processTrade(lastCandle) {
   // eslint-disable-next-line
-  const [timestamp, open, high, low, close, sma20, sma30, rsi, macd] = lastCandle;
+  const [timestamp, open, high, low, close, sma20, sma30, rsi, macd, tr, atr] = lastCandle;
 
   const tTime = new Date(parseInt(timestamp, 10));
+  // console.log(`ATR: ${atr}`);
+  // console.log(lastCandle);
 
   db
     .getActiveTrade() // check if there's an active trade in the db
@@ -52,10 +54,11 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
         if (at === true) {
           console.log('----------- OPENING POSITION -----------');
           console.log(`Opening ${tTime.toISOString()} ${ot} ${close}`);
+          // FIXME this should be re-ordered. open-position then set active trade
           db
             .setActiveTrade(at)
             .then(db.setOrderType(ot))
-            .then(trade.openPosition(ot, close, this.setOrderID))
+            .then(trade.openPosition(ot, close, atr, this.setOrderID))
             .catch(reply => console.log(`error while checking for entry signal${reply}`));
         }
       }
