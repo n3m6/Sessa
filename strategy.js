@@ -54,8 +54,11 @@ strats.threeGreen.exit = function threeGreenExit(args) {
 strats.simpleCrossOver = [];
 strats.simpleCrossOver.enter = function simpleCrossOverEnter(args) {
   const { open, close, sma20 } = args;
+
+  console.log(`open: ${open} close: ${close} sma20: ${sma20}`);
   if (open > sma20 && close < sma20) return [true, 'SHORT'];
   if (open < sma20 && close > sma20) return [true, 'LONG'];
+
   return [false, ''];
 };
 

@@ -74,7 +74,6 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
             console.log(`Active Trade ${tTime.toISOString()} ${orderType} ${close} ${sma30}`);
             args.orderType = orderType;
 
-            console.log(args);
             if (strategy.exit(args)) {
               exitTrade(timestamp, close)
                 .then(() => {
