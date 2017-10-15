@@ -47,6 +47,19 @@ function exitTrade(timestamp, close) {
 Engine.prototype.processTrade = function processTrade(lastCandle) {
   // eslint-disable-next-line
   const [timestamp, open, high, low, close, sma20, sma30, rsi, macd, tr, atr] = lastCandle;
+  const args = {
+    timestamp,
+    open,
+    high,
+    low,
+    close,
+    sma20,
+    sma30,
+    rsi,
+    macd,
+    tr,
+    atr,
+  };
 
   const tTime = new Date(parseInt(timestamp, 10));
 
@@ -55,25 +68,30 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
     .then((activeTrade) => {
       if (activeTrade === 'true') {
         // check whether we should end the trade
-        db.getOrderType().then((orderType) => {
-          console.log(`Active Trade ${tTime.toISOString()} ${orderType} ${close} ${sma30}`);
+        db
+          .getOrderType()
+          .then((orderType) => {
+            console.log(`Active Trade ${tTime.toISOString()} ${orderType} ${close} ${sma30}`);
+            args.orderType = orderType;
 
-          if (strategy.threeGreenExit(close, sma20, orderType)) {
-            exitTrade(timestamp, close)
-              .then(() => {
-                // Chck whether we need to enter a new trade after exiting previous trade
-                const [at, ot] = strategy.threeGreenEnter(close, sma20, macd, rsi);
-                // if an order needs to be placed
-                if (at === true) {
-                  enterTrade(timestamp, at, ot, close, atr).catch(console.error);
-                }
-              })
-              .catch(reply => console.error(reply));
-          }
-        });
+            console.log(args);
+            if (strategy.exit(args)) {
+              exitTrade(timestamp, close)
+                .then(() => {
+                  // Chck whether we need to enter a new trade after exiting previous trade
+                  const [at, ot] = strategy.enter(args);
+                  // if an order needs to be placed
+                  if (at === true) {
+                    enterTrade(timestamp, at, ot, close, atr).catch(console.error);
+                  }
+                })
+                .catch(reply => console.error(reply));
+            }
+          })
+          .catch(console.error);
       } else {
         // check whether we should enter a trade
-        const [at, ot] = strategy.threeGreenEnter(close, sma20, macd, rsi);
+        const [at, ot] = strategy.enter(args);
 
         // if an order needs to be placed
         if (at === true) {
@@ -81,7 +99,7 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
         }
       }
     })
-    .catch(reply => console.error(`Error trying to get activeTrade from db ${reply}`));
+    .catch(reply => console.error(`${reply}`));
 };
 
 Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(timestamp) {
