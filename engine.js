@@ -1,6 +1,7 @@
 const trade = require('./trade').Trade;
 const strategy = require('./strategy').Strategy;
 const db = require('./db').Db;
+const orderlog = require('./orderlog').OrderLog;
 
 const Engine = function Engine() {};
 
@@ -8,62 +9,88 @@ Engine.prototype.init = function init() {
   trade.init();
 };
 
-Engine.prototype.setOrderID = function setOrderID(orderID) {
-  console.log(`Order ID: ${orderID}`);
-  db.setOrderID(orderID).catch(reply => console.log(`error setting order id${reply}`));
-};
+function enterTrade(timestamp, activeTrade, orderType, close, atr) {
+  return new Promise((resolve, reject) => {
+    trade
+      .openPosition(orderType, close, atr)
+      .then(orderID => db.enterTrade(orderID, activeTrade, orderType))
+      .then(resolve)
+      .catch(reply => reject(reply));
+  });
+}
+
+function exitTrade(timestamp, close) {
+  return new Promise((resolve, reject) => {
+    db
+      .getOrderID()
+      .then((orderID) => {
+        trade
+          .closePosition(orderID, close)
+          .then(() => db.exitTrade())
+          .then(resolve)
+          .catch(reject);
+      })
+      .catch(reject);
+  });
+}
 
 Engine.prototype.processTrade = function processTrade(lastCandle) {
   // eslint-disable-next-line
   const [timestamp, open, high, low, close, sma20, sma30, rsi, macd, tr, atr] = lastCandle;
+  const args = {
+    timestamp,
+    open,
+    high,
+    low,
+    close,
+    sma20,
+    sma30,
+    rsi,
+    macd,
+    tr,
+    atr,
+  };
 
-  const tTime = new Date(parseInt(timestamp, 10));
-  // console.log(`ATR: ${atr}`);
-  // console.log(lastCandle);
+  // const tTime = new Date(parseInt(timestamp, 10));
 
   db
     .getActiveTrade() // check if there's an active trade in the db
     .then((activeTrade) => {
       if (activeTrade === 'true') {
         // check whether we should end the trade
-        db.getOrderType().then((orderType) => {
-          console.log(`Active Trade ${tTime.toISOString()} ${orderType} ${close} ${sma30}`);
+        db
+          .getOrderType()
+          .then((orderType) => {
+            args.orderType = orderType;
 
-          if (strategy.threeGreenExit(close, sma20, orderType)) {
-            console.log('----------- CLOSING POSITION -----------');
-            console.log(`Time: ${tTime.toISOString()}`);
-            console.log(`Reason: Exit Signal (price ${close} sma ${sma20}`);
-
-            db
-              .setActiveTrade('false')
-              .then(db.setOrderType(''))
-              .then(db.getOrderID().then((orderID) => {
-                trade.closePosition(orderID);
-              }))
-              .then(console.log('----------------------------------------'))
-              .catch(reply => console.log(`error ending trade${reply}`));
-          }
-        });
+            if (strategy.exit(args)) {
+              exitTrade(timestamp, close)
+                .then(() => {
+                  // Chck whether we need to enter a new trade after exiting previous trade
+                  const [at, ot] = strategy.enter(args);
+                  // if an order needs to be placed
+                  if (at === true) {
+                    enterTrade(timestamp, at, ot, close, atr).catch(console.error);
+                  }
+                })
+                .catch(reply => console.error(reply));
+            } else {
+              // LOG update
+              orderlog.update(timestamp, '-', orderType, close);
+            }
+          })
+          .catch(console.error);
       } else {
         // check whether we should enter a trade
-        let at = ''; // active trade
-        let ot = ''; // order type
-        [at, ot] = strategy.threeGreenEnter(close, sma20, macd, rsi);
+        const [at, ot] = strategy.enter(args);
 
         // if an order needs to be placed
         if (at === true) {
-          console.log('----------- OPENING POSITION -----------');
-          console.log(`Opening ${tTime.toISOString()} ${ot} ${close}`);
-          // FIXME this should be re-ordered. open-position then set active trade
-          db
-            .setActiveTrade(at)
-            .then(db.setOrderType(ot))
-            .then(trade.openPosition(ot, close, atr, this.setOrderID))
-            .catch(reply => console.log(`error while checking for entry signal${reply}`));
+          enterTrade(timestamp, at, ot, close, atr).catch(console.error);
         }
       }
     })
-    .catch(reply => console.error(`Error trying to get activeTrade from db ${reply}`));
+    .catch(reply => console.error(`${reply}`));
 };
 
 Engine.prototype.oneMinuteProcessing = function oneMinuteProcessing(timestamp) {

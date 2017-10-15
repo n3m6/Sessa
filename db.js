@@ -74,6 +74,33 @@ Db.prototype.setOrderType = function setOrderType(orderType) {
   });
 };
 
+Db.prototype.enterTrade = function enterTrade(orderID, activeTrade, orderType) {
+  return new Promise((resolve, reject) => {
+    client
+      .multi()
+      .hset(bitMEXInstrument, 'activeTrade', activeTrade)
+      .hset(bitMEXInstrument, 'orderType', orderType)
+      .hset(bitMEXInstrument, 'orderID', orderID)
+      .exec((err, replies) => {
+        if (err) reject(err);
+        resolve(replies);
+      });
+  });
+};
+
+Db.prototype.exitTrade = function exitTrade() {
+  return new Promise((resolve, reject) => {
+    client
+      .multi()
+      .hset(bitMEXInstrument, 'activeTrade', 'false')
+      .hset(bitMEXInstrument, 'orderType', '')
+      .exec((err, replies) => {
+        if (err) reject(err);
+        resolve(replies);
+      });
+  });
+};
+
 Db.prototype.getOneCandle = function getOneCandle(timestamp) {
   return new Promise((resolve, reject) => {
     const key = `${config.bitmex1MinPrefix}:${timestamp}`;

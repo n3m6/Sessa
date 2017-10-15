@@ -46,6 +46,7 @@ OrderMonitor.prototype.monitor = function monitor(data) {
     // console.log(`${timestamp}\t${side}\t${price}\t${orderQty}\t${avgPx}\t${ordType}\t${ordStatus}\t${orderID}\t${clOrdID}`);
 
     if (ordType === 'Stop' && ordStatus === 'Filled') {
+      // do order log here
       console.log('----------- CLOSING POSITION -----------');
       console.log('Reason: STOP Triggered');
       db

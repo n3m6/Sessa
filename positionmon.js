@@ -114,6 +114,7 @@ PositionMonitor.prototype.monitor = function monitor(data) {
       db
         .setActiveTrade('false')
         .then(db.setOrderType(''))
+        // do order log here
         .then(console.log('----------------------------------------'))
         .catch(reply => console.log(`error ending trade${reply}`));
     }

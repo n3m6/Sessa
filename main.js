@@ -8,6 +8,18 @@ const pmonitor = require('./positionmon.js').PositionMonitor;
 const { port, host } = config.redis;
 const pubsub = redis.createClient(port, host, { no_ready_check: true });
 
+const pubsubOneMin = `${config.bitmex1MinPrefix}:pubsub`;
+const pubsubFiveMin = `${config.bitmex5MinPrefix}:pubsub`;
+const pubsubFifteenMin = `${config.bitmex15MinPrefix}:pubsub`;
+
+const TimeEnum = {
+  ONE: 1,
+  FIVE: 5,
+  FIFTEEN: 15,
+};
+
+const timeframe = TimeEnum.ONE; // Change this to change strategy;
+
 const client = new BitmexClient(config.bitmexConfig);
 
 client.on('open', () => console.log('connection opened.'));
@@ -22,7 +34,7 @@ Run delta server independently from main
 */
 
 pubsub.on('error', (err) => {
-  console.log(`DB Error. Is DB available? ${err}`);
+  console.error(`DB Error. Is DB available? ${err}`);
   throw err;
 });
 
@@ -30,32 +42,31 @@ engine.init();
 
 /*
 three pubsubs exist right now, 1 min pubsub, 5 min pubsub & 15 min pubsub
-use one or the other (but not both) for processing your trades
-*/
-/*
-const pubsubOneMin = `${config.bitmex1MinPrefix}:pubsub`;
-
-pubsub.subscribe(pubsubOneMin);
-pubsub.on('message', (channel, message) => {
-  engine.oneMinuteProcessing(message);
-});
-*/
-/*
-const pubsubFiveMin = `${config.bitmex5MinPrefix}:pubsub`;
-
-pubsub.subscribe(pubsubFiveMin);
-pubsub.on('message', (channel, message) => {
-  engine.fiveMinuteProcessing(message);
-});
 */
 
-const pubsubFifteenMin = `${config.bitmex15MinPrefix}:pubsub`;
+switch (timeframe) {
+  case TimeEnum.ONE:
+    pubsub.subscribe(pubsubOneMin);
+    pubsub.on('message', (channel, message) => {
+      engine.oneMinuteProcessing(message);
+    });
+    break;
+  case TimeEnum.FIVE:
+    pubsub.subscribe(pubsubFiveMin);
+    pubsub.on('message', (channel, message) => {
+      engine.fiveMinuteProcessing(message);
+    });
+    break;
+  case TimeEnum.FIFTEEN:
+    pubsub.subscribe(pubsubFifteenMin);
+    pubsub.on('message', (channel, message) => {
+      engine.fifteenMinuteProcessing(message);
+    });
+    break;
+  default:
+    throw console.error('No strategy time frame defined');
+}
 
-pubsub.subscribe(pubsubFifteenMin);
-pubsub.on('message', (channel, message) => {
-  engine.fifteenMinuteProcessing(message);
-});
-
-// Order Monitoring (will trigger stop losses)
+// Order Monitoring (will trigger stop losses, remove liquidated orders etc)
 client.addStream('XBTUSD', 'order', data => omonitor.monitor(data));
 client.addStream('XBTUSD', 'position', data => pmonitor.monitor(data));
