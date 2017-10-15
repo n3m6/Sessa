@@ -1,6 +1,7 @@
 const trade = require('./trade').Trade;
 const strategy = require('./strategy').Strategy;
 const db = require('./db').Db;
+const orderlog = require('./orderlog').OrderLog;
 
 const Engine = function Engine() {};
 
@@ -10,10 +11,6 @@ Engine.prototype.init = function init() {
 
 function enterTrade(timestamp, activeTrade, orderType, close, atr) {
   return new Promise((resolve, reject) => {
-    const tTime = new Date(parseInt(timestamp, 10));
-    console.log('----------- OPENING POSITION -----------');
-    console.log(`Opening ${tTime.toISOString()} ${orderType} ${close}`);
-
     trade
       .openPosition(orderType, close, atr)
       .then(orderID => db.enterTrade(orderID, activeTrade, orderType))
@@ -24,18 +21,11 @@ function enterTrade(timestamp, activeTrade, orderType, close, atr) {
 
 function exitTrade(timestamp, close) {
   return new Promise((resolve, reject) => {
-    const tTime = new Date(parseInt(timestamp, 10));
-
     db
       .getOrderID()
       .then((orderID) => {
         trade
-          .closePosition(orderID)
-          .then(() => {
-            console.log('----------- CLOSING POSITION -----------');
-            console.log(`Time: ${tTime.toISOString()}`);
-            console.log(`Reason: Exit Signal (price ${close})`);
-          })
+          .closePosition(orderID, close)
           .then(() => db.exitTrade())
           .then(resolve)
           .catch(reject);
@@ -61,7 +51,7 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
     atr,
   };
 
-  const tTime = new Date(parseInt(timestamp, 10));
+  // const tTime = new Date(parseInt(timestamp, 10));
 
   db
     .getActiveTrade() // check if there's an active trade in the db
@@ -71,7 +61,6 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
         db
           .getOrderType()
           .then((orderType) => {
-            console.log(`Active Trade ${tTime.toISOString()} ${orderType} ${close} ${sma30}`);
             args.orderType = orderType;
 
             if (strategy.exit(args)) {
@@ -85,6 +74,9 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
                   }
                 })
                 .catch(reply => console.error(reply));
+            } else {
+              // LOG update
+              orderlog.update(timestamp, '-', orderType, close);
             }
           })
           .catch(console.error);

@@ -7,7 +7,10 @@
     "test": "mocha",
     "start": "node main.js"
   },
-  "keywords": ["crypto", "trader"],
+  "keywords": [
+    "crypto",
+    "trader"
+  ],
   "author": "Abdulla Faraz",
   "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
@@ -18,6 +21,7 @@
   },
   "dependencies": {
     "bitmex-realtime-api": "^0.2.3",
+    "colors": "^1.1.2",
     "eventemitter2": "^4.1.2",
     "lodash": "^4.17.4",
     "redis": "^2.8.0",
