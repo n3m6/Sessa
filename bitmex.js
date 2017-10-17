@@ -130,7 +130,6 @@ BitMEX.prototype.deleteOrder = function deleteOrder(orderId) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          // console.log('position closed');
           return resolve(response);
         }
         console.error('Error: order could not be deleted');
@@ -157,7 +156,6 @@ BitMEX.prototype.deleteUOrder = function deleteUOrder(orderId) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          // console.log('position closed');
           return resolve(response);
         }
         console.error('Erorr: order could not be deleted');
@@ -249,7 +247,6 @@ BitMEX.prototype.amendUStopLoss = function amendUStopLoss(uid, allocation, stopP
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          // console.log(response.body);
           return resolve(response);
         }
         console.error('Error: stop price could not be changed');

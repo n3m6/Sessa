@@ -14,7 +14,7 @@ const bitmex5MinPrefix = config.bitmex5MinPrefix; // eslint-disable-line
 const bitmex15MinPrefix = config.bitmex15MinPrefix; // eslint-disable-line
 
 client.on('error', (err) => {
-  console.log(`DB Error. Is DB available? ${err}`);
+  console.error(`DB Error. Is DB available? ${err}`);
   throw err;
 });
 
