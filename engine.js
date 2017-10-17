@@ -2,6 +2,7 @@ const trade = require('./trade').Trade;
 const strategy = require('./strategy').Strategy;
 const db = require('./db').Db;
 const orderlog = require('./orderlog').OrderLog;
+const config = require('./config');
 
 const Engine = function Engine() {};
 
@@ -34,6 +35,31 @@ function exitTrade(timestamp, close) {
   });
 }
 
+function calcStopLossMovement(args, dbStop) {
+  // calculate by how much we should trail the stop loss
+  const { open, close, orderType } = args;
+
+  // calc for LONG positions
+  if (orderType === 'LONG') {
+    if (close > open) {
+      const candleSize = parseFloat(close) - parseFloat(open);
+      const moveSize = Math.round(candleSize * config.stopTrail);
+      const newPrice = dbStop + moveSize;
+      return [true, newPrice];
+    }
+    return [false, dbStop];
+  }
+
+  // calc for SHORT positions
+  if (open > close) {
+    const candleSize = parseFloat(open) - parseFloat(close);
+    const moveSize = Math.round(candleSize * config.stopTrail);
+    const newPrice = dbStop - moveSize;
+    return [true, newPrice];
+  }
+  return [false, dbStop]; // move: true or false, newprice
+}
+
 Engine.prototype.processTrade = function processTrade(lastCandle) {
   // eslint-disable-next-line
   const [timestamp, open, high, low, close, sma20, sma30, rsi, macd, tr, atr] = lastCandle;
@@ -50,8 +76,6 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
     tr,
     atr,
   };
-
-  // const tTime = new Date(parseInt(timestamp, 10));
 
   db
     .getActiveTrade() // check if there's an active trade in the db
@@ -75,9 +99,18 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
                 })
                 .catch(reply => console.error(reply));
             } else {
+              // FIXME Move Trail Stop
+              db
+                .getStopLoss()
+                .then((dbStop) => {
+                  const [stopMove, newPrice] = calcStopLossMovement(args, dbStop);
+                  if (stopMove) {
+                    trade.amendStoploss(newPrice);
+                  }
+                })
+                .catch(console.error);
               // LOG update
               orderlog.update(timestamp, '-', orderType, close);
-              // FIXME Move Trail Stop
             }
           })
           .catch(console.error);

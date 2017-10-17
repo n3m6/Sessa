@@ -17,9 +17,9 @@ Every line will have
 
 */
 
-OrderLog.prototype.open = function open(timestamp, status, type, closePrice) {
+OrderLog.prototype.open = function open(timestamp, status, type, closePrice, orderSize) {
   const tTime = new Date(parseInt(timestamp, 10));
-  console.log(`${tTime}\t${status}\t${type}\t${closePrice}`);
+  console.log(`${tTime}\t${status}\t${type}\t${closePrice}\t${orderSize}`);
 };
 
 OrderLog.prototype.close = function close(timestamp, status, type, closePrice) {

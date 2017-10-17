@@ -15,6 +15,7 @@ key            field       value
 BitMEX:XBTUSD  activeTrade false
 BitMEX:XBTUSD  orderID     ''
 BitMEX:XBTUSD  orderType   ''
+BitMEX:XBTUSD  orderSize   ''
 BitMEX:XBTUSD  stopLoss    ''
 */
 
@@ -51,6 +52,24 @@ Db.prototype.setOrderID = function setOrderID(orderID) {
 Db.prototype.getOrderID = function getOrderID() {
   return new Promise((resolve, reject) => {
     client.hget(bitMEXInstrument, 'orderID', (err, reply) => {
+      if (err) return reject(err);
+      return resolve(reply);
+    });
+  });
+};
+
+Db.prototype.setOrderSize = function setOrderSize(osize) {
+  return new Promise((resolve, reject) => {
+    client.hset(bitMEXInstrument, 'orderSize', osize, (err, reply) => {
+      if (err) return reject(err);
+      return resolve(reply);
+    });
+  });
+};
+
+Db.prototype.getOrderSize = function getOrderSize() {
+  return new Promise((resolve, reject) => {
+    client.hget(bitMEXInstrument, 'orderSize', (err, reply) => {
       if (err) return reject(err);
       return resolve(reply);
     });
