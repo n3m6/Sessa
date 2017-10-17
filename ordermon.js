@@ -1,4 +1,5 @@
 // const config = require('./config');
+const orderlog = require('./orderlog').OrderLog;
 const db = require('./db').Db;
 
 const OrderMonitor = function OrderMonitor() {};
@@ -47,13 +48,12 @@ OrderMonitor.prototype.monitor = function monitor(data) {
 
     if (ordType === 'Stop' && ordStatus === 'Filled') {
       // do order log here
-      console.log('----------- CLOSING POSITION -----------');
-      console.log('Reason: STOP Triggered');
       db
         .setActiveTrade('false')
         .then(db.setOrderType(''))
-        .then(console.log('----------------------------------------'))
-        .catch(reply => console.log(`error ending trade${reply}`));
+        // .then(console.log('----------------------------------------'))
+        .catch(reply => console.error(`error ending trade${reply}`));
+      orderlog.stoploss(price);
     }
   }
 };

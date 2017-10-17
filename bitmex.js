@@ -106,7 +106,7 @@ BitMEX.prototype.closePosition = function closePosition(orderId) {
         if (response.code === 200) {
           return resolve(response);
         }
-        console.log('Error: position could not be closed');
+        console.error('Error: position could not be closed');
         return reject(response);
       });
   });
@@ -130,10 +130,9 @@ BitMEX.prototype.deleteOrder = function deleteOrder(orderId) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          // console.log('position closed');
           return resolve(response);
         }
-        console.log('Error: position could not be closed');
+        console.error('Error: order could not be deleted');
         return reject(response);
       });
   });
@@ -157,16 +156,16 @@ BitMEX.prototype.deleteUOrder = function deleteUOrder(orderId) {
       .send(postBody)
       .end((response) => {
         if (response.code === 200) {
-          // console.log('position closed');
           return resolve(response);
         }
-        console.log('Erorr: position could not be closed');
+        console.error('Erorr: order could not be deleted');
         return reject(response);
       });
   });
 };
 
 // Use setUStopLoss instead of this. pass the order id from position
+/*
 BitMEX.prototype.setStopLoss = function setStopLoss(side, stopPrice) {
   return new Promise((resolve, reject) => {
     // choose opposite side of order side here
@@ -196,8 +195,9 @@ BitMEX.prototype.setStopLoss = function setStopLoss(side, stopPrice) {
       });
   });
 };
+*/
 
-BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, uid) {
+BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, allocation, uid) {
   return new Promise((resolve, reject) => {
     // choose opposite side of order side here
     const newSide = side === 'LONG' ? 'Sell' : 'Buy';
@@ -206,6 +206,7 @@ BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, uid) {
     const data = {
       symbol: 'XBTUSD',
       side: newSide,
+      orderQty: allocation,
       stopPx: stopPrice,
       clOrdID: uid,
       ordType: 'Stop',
@@ -222,7 +223,33 @@ BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, uid) {
         if (response.code === 200) {
           return resolve(response);
         }
-        console.log('Error: could not set stop loss for position');
+        console.error('Error: could not set stop loss for position');
+        return reject(response);
+      });
+  });
+};
+
+BitMEX.prototype.amendUStopLoss = function amendUStopLoss(uid, allocation, stopPrice) {
+  return new Promise((resolve, reject) => {
+    const verb = 'PUT';
+    const path = '/api/v1/order';
+    const data = {
+      origClOrdID: uid,
+      orderQty: allocation,
+      stopPx: stopPrice,
+    };
+    const postBody = JSON.stringify(data);
+    const headers = bmHeaders(verb, path, postBody);
+
+    const request = unirest.put(config.api.resthost + path);
+    request
+      .header(headers)
+      .send(postBody)
+      .end((response) => {
+        if (response.code === 200) {
+          return resolve(response);
+        }
+        console.error('Error: stop price could not be changed');
         return reject(response);
       });
   });

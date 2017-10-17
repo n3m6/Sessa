@@ -1,6 +1,5 @@
 const config = require('./config');
 const bm = require('./bitmex').BitMEX;
-const utils = require('./utils');
 const db = require('./db').Db;
 const orderlog = require('./orderlog').OrderLog;
 
@@ -31,7 +30,6 @@ function determineOrderAttributes(price, atr, orderType, balance) {
     allocation = Math.round(absLoss / lossVal);
     const maxAlloc = Math.round(config.margin * config.maxBetSize * bal);
     allocation = allocation > maxAlloc ? maxAlloc : allocation;
-    const balpercent = allocation / (bal * config.margin);
   } else {
     stopLossPosition = Math.round(parseFloat(price) + atrk);
     absLoss = absLoss * bal * config.maxLoss;
@@ -41,7 +39,6 @@ function determineOrderAttributes(price, atr, orderType, balance) {
     allocation = Math.round(absLoss / lossVal);
     const maxAlloc = Math.round(config.margin * config.maxBetSize * bal);
     allocation = allocation > maxAlloc ? maxAlloc : allocation;
-    const balpercent = allocation / (bal * config.margin);
   }
 
   return [stopLossPosition, allocation];
@@ -68,14 +65,20 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, av
         bm
           .marketOrder(side, orderSize)
           .then((response) => {
-            this.setStopLoss(orderType, response.body.orderID, stopLossPosition);
+            // Set stop Loss on service provider
+            this.setStopLoss(orderType, response.body.orderID, orderSize, stopLossPosition);
+
+            // record the order id return from service provider
             db
               .setOrderID(response.body.orderID)
               .catch(reply => console.error(`error setting order id${reply}`));
+
+            // record the positionsize
+            db.setOrderSize(orderSize).catch(console.error);
             resolve(response.body.orderID);
 
-            // LOG the Open
-            orderlog.open(Date.now(), 'OPEN', orderType, currentPrice);
+            // LOG the Open position
+            orderlog.open(Date.now(), 'OPEN', orderType, currentPrice, orderSize);
           })
           .catch(reject);
       })
@@ -94,9 +97,40 @@ Trade.prototype.closePosition = function closePosition(orderID, close) {
   });
 };
 
-Trade.prototype.setStopLoss = function setStopLoss(side, orderID, stopPrice) {
+Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, stopPrice) {
   // stop Price should be a rounded integer for BitMEX
-  bm.setUStopLoss(side, stopPrice, orderID).catch(response => console.error(response.body));
+  bm
+    .setUStopLoss(side, stopPrice, orderQty, orderID)
+    .then(() => {
+      // record stop loss price in db
+      db.setStopLoss(stopPrice).catch(console.error);
+    })
+    .catch(console.error);
+};
+
+Trade.prototype.amendStoploss = function amendStoploss(newPrice) {
+  // get stop price and insert new price into db
+  db
+    .getOrderID()
+    .then((orderID) => {
+      // if an order id is available
+      if (orderID !== '' || orderID !== null || orderID !== undefined) {
+        db
+          .getOrderSize()
+          .then((orderSize) => {
+            bm
+              .amendUStopLoss(orderID, orderSize, newPrice)
+              .then(() => {
+                // record change in the db
+                db.setStopLoss(newPrice).catch(console.error);
+              })
+              .catch(console.error);
+          })
+          .catch(console.error);
+        // console.log(orderID);
+      }
+    })
+    .catch(console.error);
 };
 
 exports.Trade = new Trade();

@@ -10,11 +10,13 @@ const { bitMEXInstrument } = config;
 
 /*
 for positions:
-key     field       value
+key            field       value
 -------------------------
-XBTUSD  activeTrade false
-XBTUSD  orderID     ''
-XBTUSD  orderType   ''
+BitMEX:XBTUSD  activeTrade false
+BitMEX:XBTUSD  orderID     ''
+BitMEX:XBTUSD  orderType   ''
+BitMEX:XBTUSD  orderSize   ''
+BitMEX:XBTUSD  stopLoss    ''
 */
 
 const Db = function Db() {};
@@ -56,6 +58,24 @@ Db.prototype.getOrderID = function getOrderID() {
   });
 };
 
+Db.prototype.setOrderSize = function setOrderSize(osize) {
+  return new Promise((resolve, reject) => {
+    client.hset(bitMEXInstrument, 'orderSize', osize, (err, reply) => {
+      if (err) return reject(err);
+      return resolve(reply);
+    });
+  });
+};
+
+Db.prototype.getOrderSize = function getOrderSize() {
+  return new Promise((resolve, reject) => {
+    client.hget(bitMEXInstrument, 'orderSize', (err, reply) => {
+      if (err) return reject(err);
+      return resolve(reply);
+    });
+  });
+};
+
 Db.prototype.getOrderType = function getOrderType() {
   return new Promise((resolve, reject) => {
     client.hget(bitMEXInstrument, 'orderType', (err, reply) => {
@@ -68,6 +88,24 @@ Db.prototype.getOrderType = function getOrderType() {
 Db.prototype.setOrderType = function setOrderType(orderType) {
   return new Promise((resolve, reject) => {
     client.hset(bitMEXInstrument, 'orderType', orderType, (err, reply) => {
+      if (err) return reject(err);
+      return resolve(reply);
+    });
+  });
+};
+
+Db.prototype.getStopLoss = function getStopLoss() {
+  return new Promise((resolve, reject) => {
+    client.hget(bitMEXInstrument, 'stopLoss', (err, reply) => {
+      if (err) return reject(err);
+      return resolve(reply);
+    });
+  });
+};
+
+Db.prototype.setStopLoss = function setStopLoss(stopLoss) {
+  return new Promise((resolve, reject) => {
+    client.hset(bitMEXInstrument, 'stopLoss', stopLoss, (err, reply) => {
       if (err) return reject(err);
       return resolve(reply);
     });
