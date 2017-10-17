@@ -77,6 +77,7 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
             } else {
               // LOG update
               orderlog.update(timestamp, '-', orderType, close);
+              // FIXME Move Trail Stop
             }
           })
           .catch(console.error);
