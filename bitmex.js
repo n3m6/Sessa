@@ -102,7 +102,6 @@ BitMEX.prototype.closePosition = function closePosition(orderId) {
       .header(headers)
       .send(postBody)
       .end((response) => {
-        // FIXME doesn't detect error from API
         if (response.code === 200) {
           return resolve(response);
         }
@@ -164,39 +163,6 @@ BitMEX.prototype.deleteUOrder = function deleteUOrder(orderId) {
   });
 };
 
-// Use setUStopLoss instead of this. pass the order id from position
-/*
-BitMEX.prototype.setStopLoss = function setStopLoss(side, stopPrice) {
-  return new Promise((resolve, reject) => {
-    // choose opposite side of order side here
-    const newSide = side === 'LONG' ? 'Sell' : 'Buy';
-    const verb = 'POST';
-    const path = '/api/v1/order';
-    const data = {
-      symbol: 'XBTUSD',
-      side: newSide,
-      stopPx: stopPrice,
-      ordType: 'Stop',
-      execInst: 'Close, LastPrice',
-    };
-    const postBody = JSON.stringify(data);
-    const headers = bmHeaders(verb, path, postBody);
-
-    const request = unirest.post(config.api.resthost + path);
-    request
-      .header(headers)
-      .send(postBody)
-      .end((response) => {
-        if (response.code === 200) {
-          return resolve(response);
-        }
-        console.log('Error: could not set stop loss for position');
-        return reject(response);
-      });
-  });
-};
-*/
-
 BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, allocation, uid) {
   return new Promise((resolve, reject) => {
     // choose opposite side of order side here
@@ -210,7 +176,7 @@ BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, allocatio
       stopPx: stopPrice,
       clOrdID: uid,
       ordType: 'Stop',
-      execInst: 'Close, LastPrice',
+      execInst: 'LastPrice', // add Close if this doesn't work.
     };
     const postBody = JSON.stringify(data);
     const headers = bmHeaders(verb, path, postBody);

@@ -99,13 +99,12 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
                 })
                 .catch(reply => console.error(reply));
             } else {
-              // FIXME Move Trail Stop
               db
                 .getStopLoss()
                 .then((dbStop) => {
                   const [stopMove, newPrice] = calcStopLossMovement(args, dbStop);
                   if (stopMove) {
-                    trade.amendStoploss(newPrice);
+                    trade.amendStoploss(newPrice).catch(console.error);
                   }
                 })
                 .catch(console.error);

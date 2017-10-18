@@ -113,8 +113,8 @@ PositionMonitor.prototype.monitor = function monitor(data) {
     if (posState === 'Deleverage') {
       db
         .setActiveTrade('false')
-        .then(db.setOrderType(''))
-        .catch(reply => console.log(`error ending trade${reply}`));
+        .then(db.setOrderType('').catch(console.error))
+        .catch(reply => console.error(`error ending trade${reply}`));
 
       // LOG
       orderlog.deleveraged(liquidationPrice);
@@ -122,8 +122,8 @@ PositionMonitor.prototype.monitor = function monitor(data) {
     if (posState === 'Liquidation') {
       db
         .setActiveTrade('false')
-        .then(db.setOrderType(''))
-        .catch(reply => console.log(`error ending trade${reply}`));
+        .then(db.setOrderType('').catch(console.error))
+        .catch(reply => console.error(`error ending trade${reply}`));
 
       // LOG
       orderlog.liquidated(liquidationPrice);

@@ -66,23 +66,33 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, av
           .marketOrder(side, orderSize)
           .then((response) => {
             // Set stop Loss on service provider
-            this.setStopLoss(orderType, response.body.orderID, orderSize, stopLossPosition);
 
-            // record the order id return from service provider
-            db
-              .setOrderID(response.body.orderID)
-              .catch(reply => console.error(`error setting order id${reply}`));
+            const { orderID } = response.body;
+            console.log(`orderID: ${orderID}`);
 
-            // record the positionsize
-            db.setOrderSize(orderSize).catch(console.error);
-            resolve(response.body.orderID);
-
-            // LOG the Open position
-            orderlog.open(Date.now(), 'OPEN', orderType, currentPrice, orderSize);
+            this.setStopLoss(orderType, orderID, orderSize, stopLossPosition)
+              .then(() => {
+                // record the order id return from service provider
+                db
+                  .setOrderID(orderID)
+                  .then(() => {
+                    // record the positionsize
+                    db
+                      .setOrderSize(orderSize)
+                      .then(() => {
+                        // LOG the Open position
+                        orderlog.open(Date.now(), 'OPEN', orderType, currentPrice, orderSize);
+                      })
+                      .then(resolve(orderID))
+                      .catch(reply => reject(reply));
+                  })
+                  .catch(reply => reject(reply));
+              })
+              .catch(reply => reject(reply));
           })
-          .catch(reject);
+          .catch(reply => reject(reply));
       })
-      .catch(reject);
+      .catch(reply => reject(reply));
   });
 };
 
@@ -90,47 +100,60 @@ Trade.prototype.closePosition = function closePosition(orderID, close) {
   return new Promise((resolve, reject) => {
     bm
       .closePosition(orderID)
-      .then(bm.deleteUOrder(orderID))
+      .then(bm.deleteUOrder(orderID).catch(reject))
       .then(orderlog.close(Date.now(), 'CLOSE', '-', close))
       .then(resolve)
       .catch(reject);
   });
 };
 
+// FIXME this function was changed
 Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, stopPrice) {
   // stop Price should be a rounded integer for BitMEX
-  bm
-    .setUStopLoss(side, stopPrice, orderQty, orderID)
-    .then(() => {
-      // record stop loss price in db
-      db.setStopLoss(stopPrice).catch(console.error);
-    })
-    .catch(console.error);
+  return new Promise((resolve, reject) => {
+    bm
+      .setUStopLoss(side, stopPrice, orderQty, orderID)
+      .then(() => {
+        // record stop loss price in db
+        db
+          .setStopLoss(stopPrice)
+          .then(() => resolve)
+          .catch(reply => reject(reply));
+      })
+      .catch(reply => reject(reply));
+  });
 };
 
+// FIXME this function was changed
 Trade.prototype.amendStoploss = function amendStoploss(newPrice) {
-  // get stop price and insert new price into db
-  db
-    .getOrderID()
-    .then((orderID) => {
-      // if an order id is available
-      if (orderID !== '' || orderID !== null || orderID !== undefined) {
-        db
-          .getOrderSize()
-          .then((orderSize) => {
-            bm
-              .amendUStopLoss(orderID, orderSize, newPrice)
-              .then(() => {
-                // record change in the db
-                db.setStopLoss(newPrice).catch(console.error);
-              })
-              .catch(console.error);
-          })
-          .catch(console.error);
-        // console.log(orderID);
-      }
-    })
-    .catch(console.error);
+  return new Promise((resolve, reject) => {
+    db
+      .getOrderID() // Get the order from DB
+      // eslint-disable-next-line
+      .then(orderID => {
+        // if an order id is available
+        if (orderID !== '' || orderID !== null || orderID !== undefined) {
+          db
+            .getOrderSize() // get the order size
+            .then((orderSize) => {
+              bm
+                .amendUStopLoss(orderID, orderSize, newPrice) // amend stop loss
+                .then(() => {
+                  // record change in the db
+                  db
+                    .setStopLoss(newPrice)
+                    .then(() => resolve)
+                    .catch(reply => reject(reply));
+                })
+                .catch(reply => reject(reply));
+            })
+            .catch(reply => reject(reply));
+        } else {
+          return reject;
+        }
+      })
+      .catch(reply => reject(reply));
+  });
 };
 
 exports.Trade = new Trade();
