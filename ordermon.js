@@ -50,7 +50,7 @@ OrderMonitor.prototype.monitor = function monitor(data) {
       // do order log here
       db
         .setActiveTrade('false')
-        .then(db.setOrderType(''))
+        .then(db.setOrderType('').catch(console.error))
         // .then(console.log('----------------------------------------'))
         .catch(reply => console.error(`error ending trade${reply}`));
       orderlog.stoploss(price);

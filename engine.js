@@ -15,7 +15,7 @@ function enterTrade(timestamp, activeTrade, orderType, close, atr) {
     trade
       .openPosition(orderType, close, atr)
       .then(orderID => db.enterTrade(orderID, activeTrade, orderType))
-      .then(resolve)
+      .then(reply => resolve(reply))
       .catch(reply => reject(reply));
   });
 }
@@ -28,10 +28,10 @@ function exitTrade(timestamp, close) {
         trade
           .closePosition(orderID, close)
           .then(() => db.exitTrade())
-          .then(resolve)
-          .catch(reject);
+          .then(reply => resolve(reply))
+          .catch(reply => reject(reply));
       })
-      .catch(reject);
+      .catch(reply => reject(reply));
   });
 }
 
@@ -82,30 +82,38 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
     .then((activeTrade) => {
       if (activeTrade === 'true') {
         // check whether we should end the trade
+        // console.log('active trade found');
+
         db
           .getOrderType()
           .then((orderType) => {
             args.orderType = orderType;
+            // console.log(`order type${orderType}`);
 
             if (strategy.exit(args)) {
+              // console.log('exit signal received');
+
               exitTrade(timestamp, close)
                 .then(() => {
                   // Chck whether we need to enter a new trade after exiting previous trade
+                  // console.log('checking whether we should enter a new trade');
                   const [at, ot] = strategy.enter(args);
                   // if an order needs to be placed
                   if (at === true) {
+                    // console.log('new trade entry signal received');
                     enterTrade(timestamp, at, ot, close, atr).catch(console.error);
                   }
                 })
                 .catch(reply => console.error(reply));
             } else {
-              // FIXME Move Trail Stop
+              // console.log('no exit signal, moving stop loss if necessary');
               db
                 .getStopLoss()
                 .then((dbStop) => {
                   const [stopMove, newPrice] = calcStopLossMovement(args, dbStop);
                   if (stopMove) {
-                    trade.amendStoploss(newPrice);
+                    // console.log('moving stop loss');
+                    trade.amendStoploss(newPrice).catch(console.error);
                   }
                 })
                 .catch(console.error);
@@ -116,10 +124,13 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
           .catch(console.error);
       } else {
         // check whether we should enter a trade
+        // console.log('no active trade');
         const [at, ot] = strategy.enter(args);
+        // console.log(`strategy active trade: ${at} order type: ${ot}`);
 
         // if an order needs to be placed
         if (at === true) {
+          // console.log('enter signal recieved');
           enterTrade(timestamp, at, ot, close, atr).catch(console.error);
         }
       }
