@@ -25,8 +25,8 @@ const Db = function Db() {};
 Db.prototype.getActiveTrade = function getActiveTrade() {
   return new Promise((resolve, reject) => {
     client.hget(bitMEXInstrument, 'activeTrade', (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -34,8 +34,8 @@ Db.prototype.getActiveTrade = function getActiveTrade() {
 Db.prototype.setActiveTrade = function setActiveTrade(activeTrade) {
   return new Promise((resolve, reject) => {
     client.hset(bitMEXInstrument, 'activeTrade', activeTrade, (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -43,8 +43,8 @@ Db.prototype.setActiveTrade = function setActiveTrade(activeTrade) {
 Db.prototype.setOrderID = function setOrderID(orderID) {
   return new Promise((resolve, reject) => {
     client.hset(bitMEXInstrument, 'orderID', orderID, (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -52,8 +52,8 @@ Db.prototype.setOrderID = function setOrderID(orderID) {
 Db.prototype.getOrderID = function getOrderID() {
   return new Promise((resolve, reject) => {
     client.hget(bitMEXInstrument, 'orderID', (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -61,8 +61,8 @@ Db.prototype.getOrderID = function getOrderID() {
 Db.prototype.setOrderSize = function setOrderSize(osize) {
   return new Promise((resolve, reject) => {
     client.hset(bitMEXInstrument, 'orderSize', osize, (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -70,8 +70,8 @@ Db.prototype.setOrderSize = function setOrderSize(osize) {
 Db.prototype.getOrderSize = function getOrderSize() {
   return new Promise((resolve, reject) => {
     client.hget(bitMEXInstrument, 'orderSize', (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -79,8 +79,8 @@ Db.prototype.getOrderSize = function getOrderSize() {
 Db.prototype.getOrderType = function getOrderType() {
   return new Promise((resolve, reject) => {
     client.hget(bitMEXInstrument, 'orderType', (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -88,8 +88,8 @@ Db.prototype.getOrderType = function getOrderType() {
 Db.prototype.setOrderType = function setOrderType(orderType) {
   return new Promise((resolve, reject) => {
     client.hset(bitMEXInstrument, 'orderType', orderType, (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -97,8 +97,8 @@ Db.prototype.setOrderType = function setOrderType(orderType) {
 Db.prototype.getStopLoss = function getStopLoss() {
   return new Promise((resolve, reject) => {
     client.hget(bitMEXInstrument, 'stopLoss', (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -106,8 +106,8 @@ Db.prototype.getStopLoss = function getStopLoss() {
 Db.prototype.setStopLoss = function setStopLoss(stopLoss) {
   return new Promise((resolve, reject) => {
     client.hset(bitMEXInstrument, 'stopLoss', stopLoss, (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -157,8 +157,8 @@ Db.prototype.getOneCandle = function getOneCandle(timestamp) {
       'atr',
     ];
     client.hmget(args, (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -181,8 +181,8 @@ Db.prototype.getFiveCandle = function getFiveCandle(timestamp) {
       'atr',
     ];
     client.hmget(args, (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };
@@ -205,8 +205,8 @@ Db.prototype.getFifteenCandle = function getFifteenCandle(timestamp) {
       'atr',
     ];
     client.hmget(args, (err, reply) => {
-      if (err) return reject(err);
-      return resolve(reply);
+      if (err) reject(err);
+      resolve(reply);
     });
   });
 };

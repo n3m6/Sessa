@@ -176,7 +176,7 @@ BitMEX.prototype.setUStopLoss = function setUStopLoss(side, stopPrice, allocatio
       stopPx: stopPrice,
       clOrdID: uid,
       ordType: 'Stop',
-      execInst: 'LastPrice', // add Close if this doesn't work.
+      execInst: 'LastPrice,Close',
     };
     const postBody = JSON.stringify(data);
     const headers = bmHeaders(verb, path, postBody);

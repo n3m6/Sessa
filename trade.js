@@ -56,31 +56,37 @@ Trade.prototype.openPosition = function openPosition(orderType, currentPrice, av
     bm
       .getBalance()
       .then((balance) => {
+        // console.log(`balance: ${balance}`);
         const [stopLossPosition, orderSize] = determineOrderAttributes(
           currentPrice,
           avgTrueRange,
           orderType,
           balance,
         );
+        // console.log(`stop loss: ${stopLossPosition} order size: ${orderSize}`);
+
         bm
           .marketOrder(side, orderSize)
           .then((response) => {
             // Set stop Loss on service provider
-
             const { orderID } = response.body;
-            console.log(`orderID: ${orderID}`);
+            // console.log('response recieved');
+            // console.log(response.body);
 
             this.setStopLoss(orderType, orderID, orderSize, stopLossPosition)
               .then(() => {
                 // record the order id return from service provider
+                // console.log('stop loss ---');
                 db
                   .setOrderID(orderID)
                   .then(() => {
                     // record the positionsize
+                    // console.log('order id recorded in db');
                     db
                       .setOrderSize(orderSize)
                       .then(() => {
                         // LOG the Open position
+                        // console.log('order size recorded in db');
                         orderlog.open(Date.now(), 'OPEN', orderType, currentPrice, orderSize);
                       })
                       .then(resolve(orderID))
@@ -100,10 +106,10 @@ Trade.prototype.closePosition = function closePosition(orderID, close) {
   return new Promise((resolve, reject) => {
     bm
       .closePosition(orderID)
-      .then(bm.deleteUOrder(orderID).catch(reject))
+      .then(bm.deleteUOrder(orderID).catch(reply => reject(reply)))
       .then(orderlog.close(Date.now(), 'CLOSE', '-', close))
-      .then(resolve)
-      .catch(reject);
+      .then(reply => resolve(reply))
+      .catch(reply => reject(reply));
   });
 };
 
@@ -114,10 +120,11 @@ Trade.prototype.setStopLoss = function setStopLoss(side, orderID, orderQty, stop
     bm
       .setUStopLoss(side, stopPrice, orderQty, orderID)
       .then(() => {
+        // console.log('stop loss assigned, recording in db');
         // record stop loss price in db
         db
           .setStopLoss(stopPrice)
-          .then(() => resolve)
+          .then(reply => resolve(reply))
           .catch(reply => reject(reply));
       })
       .catch(reply => reject(reply));
@@ -142,14 +149,15 @@ Trade.prototype.amendStoploss = function amendStoploss(newPrice) {
                   // record change in the db
                   db
                     .setStopLoss(newPrice)
-                    .then(() => resolve)
+                    .then(reply => resolve(reply))
                     .catch(reply => reject(reply));
                 })
                 .catch(reply => reject(reply));
             })
             .catch(reply => reject(reply));
         } else {
-          return reject;
+          // invalid id reply callback error function
+          reject();
         }
       })
       .catch(reply => reject(reply));
