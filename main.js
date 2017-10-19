@@ -18,7 +18,7 @@ const TimeEnum = {
   FIFTEEN: 15,
 };
 
-const timeframe = TimeEnum.FIFTEEN; // Change this to change strategy;
+const timeframe = TimeEnum.ONE; // Change this to change strategy;
 
 const client = new BitmexClient(config.bitmexConfig);
 
