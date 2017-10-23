@@ -13,6 +13,14 @@ BacktestFinancial.prototype.sma = function sma(data, range, currClose) {
   return currClose;
 };
 
+BacktestFinancial.prototype.ema1 = function ema1(data, range, close) {
+  return close;
+};
+
+BacktestFinancial.prototype.ema2 = function ema2(data, range, close) {
+  return close;
+};
+
 function trueRange(current, last) {
   const tmp = Math.max(
     Math.abs(current.high - current.low),

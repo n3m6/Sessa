@@ -74,13 +74,15 @@ function entryPriceCalc(price, orderSize, orderType) {
 
   if (orderType === 'LONG') {
     const feeVal = feeCalc(orderSize, p);
-    const slip = slippageCalc(p);
+    // const slip = slippageCalc(p);
+    const slip = 0;
 
     return p + feeVal + slip;
   }
 
   const feeVal = feeCalc(orderSize, p);
-  const slip = slippageCalc(p);
+  // const slip = slippageCalc(p);
+  const slip = 0;
 
   return p - feeVal - slip;
 }
@@ -105,9 +107,20 @@ function tradeValueCalc(price, entryPrice, orderType, orderSize) {
   return tradeValue;
 }
 
-/** ********* STRATEGIES *********** */
+function trade(response, b, enter, exit, args) {
+  let ma1 = 25;
+  let atr = 14;
+  const ema1 = 8;
+  const ema2 = 35;
 
-function simpleCrossOver(response, ma, atrVal, b) {
+  if (typeof args.ma1 !== 'undefined') {
+    ma1 = args.ma1; // eslint-disable-line
+  }
+
+  if (typeof args.atr !== 'undefined') {
+    atr = args.atr; // eslint-disable-line
+  }
+
   let balance = b;
 
   // trade information
@@ -121,7 +134,7 @@ function simpleCrossOver(response, ma, atrVal, b) {
   const trades = [];
   response.forEach((val) => {
     // check moving averages
-    const tmp = {
+    const currCandle = {
       timestamp: val.timestamp,
       open: val.open,
       high: val.high,
@@ -131,22 +144,22 @@ function simpleCrossOver(response, ma, atrVal, b) {
       volume: val.volume,
     };
 
-    const tsma = fin.sma(trades, ma, tmp.close);
-    tmp.ma = utils.roundTo(tsma, 2);
-    const [ttr, tatr] = fin.avgTrueRange(trades, atrVal, tmp);
-    tmp.tr = utils.roundTo(ttr, 2);
-    tmp.atr = utils.roundTo(tatr, 2);
+    const tsma = fin.sma(trades, ma1, currCandle.close);
+    currCandle.ma1 = utils.roundTo(tsma, 2);
+    const [ttr, tatr] = fin.avgTrueRange(trades, atr, currCandle);
+    currCandle.tr = utils.roundTo(ttr, 2);
+    currCandle.atr = utils.roundTo(tatr, 2);
 
-    trades.push(tmp);
+    trades.push(currCandle);
 
     // Do stop loss here before taking or exiting trades
 
     // check entry and exit here
-    if (trades.length > Math.max(ma, atrVal)) {
+    if (trades.length > Math.max(ma1, atr, ema1, ema2)) {
       // skip first 16 rows
       if (activeTrade) {
         // check for exit
-        if (strat.simpleCrossOverExit(tmp.open, tmp.close, tmp.ma, orderType)) {
+        if (exit(currCandle, orderType)) {
           // exit here
           activeTrade = false;
           balance += tradeValue; // change this to plus or minus later
@@ -155,47 +168,76 @@ function simpleCrossOver(response, ma, atrVal, b) {
           entryPrice = 0;
 
           // recheck for entry on other side
-          const [at, ot] = strat.simpleCrossOverEnter(tmp.open, tmp.close, tmp.ma);
+          const [at, ot] = enter(currCandle);
           if (at) {
             // enter here
             activeTrade = true;
             orderType = ot; // LONG or SHORT
-            [stopLoss, orderSize] = positionSize(tmp.close, tmp.atr, orderType, balance);
+            [stopLoss, orderSize] = positionSize(
+              currCandle.close,
+              currCandle.atr,
+              orderType,
+              balance,
+            );
             balance -= orderSize / kmargin;
-            entryPrice = entryPriceCalc(tmp.close, orderSize, orderType);
+            entryPrice = entryPriceCalc(currCandle.close, orderSize, orderType);
           }
         }
       } else {
         // check for entry
-        const [at, ot] = strat.simpleCrossOverEnter(tmp.open, tmp.close, tmp.ma);
+        const [at, ot] = enter(currCandle);
         if (at) {
           // enter here
           activeTrade = true;
           orderType = ot; // LONG or SHORT
-          [stopLoss, orderSize] = positionSize(tmp.close, tmp.atr, orderType, balance);
+          [stopLoss, orderSize] = positionSize(
+            currCandle.close,
+            currCandle.atr,
+            orderType,
+            balance,
+          );
           balance -= orderSize / kmargin;
-          entryPrice = entryPriceCalc(tmp.close, orderSize, orderType);
+          entryPrice = entryPriceCalc(currCandle.close, orderSize, orderType);
         }
       }
     }
 
     // calculate tradeValue
     if (activeTrade) {
-      tradeValue = tradeValueCalc(tmp.close, entryPrice, orderType, orderSize);
+      tradeValue = tradeValueCalc(currCandle.close, entryPrice, orderType, orderSize);
     }
 
-    /*
-    const d = new Date(parseInt(tmp.timestamp, 10));
+    const d = new Date(parseInt(currCandle.timestamp, 10));
     const ttime = d.toISOString();
-    console.log(`${ttime}\t${tmp.open}\t${tmp.high}\t${tmp.low}\t${tmp.close}\t${tmp.ma}\t${activeTrade}\t${orderType}\t${orderSize}\t${utils.roundTo(
-      balance,
-      2,
-    )}\t${utils.roundTo(tradeValue, 2)}\t${utils.roundTo(balance + tradeValue, 2)}`);
-    */
+    process.stdout.write(`${ttime}\t`);
+    process.stdout.write(`${currCandle.open}\t`);
+    process.stdout.write(`${currCandle.high}\t`);
+    process.stdout.write(`${currCandle.low}\t`);
+    process.stdout.write(`${currCandle.close}\t`);
+    process.stdout.write(`${currCandle.ma1}\t`);
+    process.stdout.write(`${activeTrade}\t`);
+    process.stdout.write(`${orderType}\t`);
+    process.stdout.write(`${orderSize}\t`);
+    process.stdout.write(`${utils.roundTo(balance, 2)}\t`);
+    process.stdout.write(`${utils.roundTo(tradeValue, 2)}\t`);
+    process.stdout.write(`${utils.roundTo(balance + tradeValue, 2)}`);
+    process.stdout.write('\n');
   });
 
   return balance + tradeValue;
 }
+
+/** ********* STRATEGIES *********** */
+function simpleCrossOver(response, ma, atrVal, b) {
+  const args = {
+    ma1: ma,
+    atr: atrVal,
+  };
+  const balance = trade(response, b, strat.simpleCrossOverEnter, strat.simpleCrossOverExit, args);
+  return balance;
+}
+
+function doubleEMA(response, ema1, ema2, b) {}
 
 /** ******************************** */
 
@@ -206,4 +248,5 @@ module.exports = {
   kmaxBetSize,
   kfees,
   simpleCrossOver,
+  doubleEMA,
 };
