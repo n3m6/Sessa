@@ -10,13 +10,14 @@ db
   .then((response) => {
     const balance = 100;
 
+    /*
     const ma = 25;
     const atrVal = 14;
     const balanceLeft = trade.simpleCrossOver(response, ma, atrVal, balance);
     const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
     console.log(`Balance: ${balance}\t${balanceLeft}\t${utils.roundTo(percent * 100, 2)}%`);
+*/
 
-    /*
     // STRATEGY 1: Simple Single Moving Average Price Crossover
     console.log('============================================================');
     console.log('Strategy 1: Moving Average Price Crossover Strategy');
@@ -43,7 +44,6 @@ db
       process.stdout.write('\n');
     }
     console.log('============================================================');
-*/
 
     // STRATEGY 2: Double MA Crossover
 

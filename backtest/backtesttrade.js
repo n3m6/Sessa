@@ -61,7 +61,7 @@ function slippageCalc() {
   // Include slippage calculation to make it more real
   const slip = utils.randomizer(5, 30);
   const chance = utils.randomizer(0.01, 10);
-  if (chance > 5.9) {
+  if (chance > 7.9) {
     return slip;
   }
   return 0;
@@ -74,15 +74,13 @@ function entryPriceCalc(price, orderSize, orderType) {
 
   if (orderType === 'LONG') {
     const feeVal = feeCalc(orderSize, p);
-    // const slip = slippageCalc(p);
-    const slip = 0;
+    const slip = slippageCalc(p);
 
     return p + feeVal + slip;
   }
 
   const feeVal = feeCalc(orderSize, p);
-  // const slip = slippageCalc(p);
-  const slip = 0;
+  const slip = slippageCalc(p);
 
   return p - feeVal - slip;
 }
@@ -162,7 +160,8 @@ function trade(response, b, enter, exit, args) {
         if (exit(currCandle, orderType)) {
           // exit here
           activeTrade = false;
-          balance += tradeValue; // change this to plus or minus later
+          tradeValue = tradeValueCalc(currCandle.close, entryPrice, orderType, orderSize);
+          balance += tradeValue;
           orderType = '    ';
           orderSize = 0;
           entryPrice = 0;
@@ -206,7 +205,7 @@ function trade(response, b, enter, exit, args) {
     if (activeTrade) {
       tradeValue = tradeValueCalc(currCandle.close, entryPrice, orderType, orderSize);
     }
-
+    /*
     const d = new Date(parseInt(currCandle.timestamp, 10));
     const ttime = d.toISOString();
     process.stdout.write(`${ttime}\t`);
@@ -222,6 +221,7 @@ function trade(response, b, enter, exit, args) {
     process.stdout.write(`${utils.roundTo(tradeValue, 2)}\t`);
     process.stdout.write(`${utils.roundTo(balance + tradeValue, 2)}`);
     process.stdout.write('\n');
+    */
   });
 
   return balance + tradeValue;
