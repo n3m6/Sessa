@@ -14,11 +14,39 @@ BacktestFinancial.prototype.sma = function sma(data, range, currClose) {
 };
 
 BacktestFinancial.prototype.ema1 = function ema1(data, range, close) {
-  return close;
+  if (data.length + 1 < range) return close;
+
+  if (data.length + 1 === range) {
+    const sl = utils.arraySlice(range - 1, data);
+    let total = sl.reduce((sum, val) => sum + parseFloat(val.close), 0);
+    total += parseFloat(close);
+    return total / range;
+  }
+
+  const prev = parseFloat(data[data.length - 1].ema1);
+  const weight = 2 / (range + 1);
+  let ema = (parseFloat(close) - prev) * weight;
+  ema += prev;
+
+  return ema;
 };
 
 BacktestFinancial.prototype.ema2 = function ema2(data, range, close) {
-  return close;
+  if (data.length + 1 < range) return close;
+
+  if (data.length + 1 === range) {
+    const sl = utils.arraySlice(range - 1, data);
+    let total = sl.reduce((sum, val) => sum + parseFloat(val.close), 0);
+    total += parseFloat(close);
+    return total / range;
+  }
+
+  const prev = parseFloat(data[data.length - 1].ema2);
+  const weight = 2 / (range + 1);
+  let ema = (parseFloat(close) - prev) * weight;
+  ema += prev;
+
+  return ema;
 };
 
 function trueRange(current, last) {
@@ -60,6 +88,31 @@ BacktestFinancial.prototype.avgTrueRange = function avgTrueRange(data, range, cu
   const total = n1 + tr;
   const atr = total / range;
   return [tr, atr];
+};
+
+BacktestFinancial.prototype.donchian = function donchian(data, range, curr) {
+  if (data[0] != null) {
+    const sl = utils.arraySlice(range - 1, data);
+
+    const hightmp = sl.reduce((sum, val) => Math.max(sum, val.high), 0);
+    const high = Math.max(parseFloat(curr.high), hightmp);
+
+    const lowtmp = sl.reduce(
+      (sum, val) => Math.min(sum, parseFloat(val.low)),
+      Number.MAX_SAFE_INTEGER,
+    );
+    const low = Math.min(parseFloat(curr.low), lowtmp);
+
+    const mid = (high + low) / 2;
+
+    return [high, mid, low];
+  }
+
+  return [
+    parseFloat(curr.high),
+    (parseFloat(curr.high) + parseFloat(curr.low)) / 2,
+    parseFloat(curr.low),
+  ];
 };
 
 exports.BacktestFinancial = new BacktestFinancial();
