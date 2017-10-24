@@ -44,7 +44,8 @@ function calcStopLossMovement(args, dbStop) {
     if (close > open) {
       const candleSize = parseFloat(close) - parseFloat(open);
       const moveSize = Math.round(candleSize * config.stopTrail);
-      const newPrice = dbStop + moveSize;
+      const newPrice = Math.round(parseFloat(dbStop) + moveSize);
+
       return [true, newPrice];
     }
     return [false, dbStop];
@@ -54,7 +55,8 @@ function calcStopLossMovement(args, dbStop) {
   if (open > close) {
     const candleSize = parseFloat(open) - parseFloat(close);
     const moveSize = Math.round(candleSize * config.stopTrail);
-    const newPrice = dbStop - moveSize;
+    const newPrice = Math.round(parseFloat(dbStop) - moveSize);
+
     return [true, newPrice];
   }
   return [false, dbStop]; // move: true or false, newprice

@@ -38,6 +38,30 @@ BitMEX.prototype.getBalance = function getBalance() {
   });
 };
 
+// FIXME this function is untested
+BitMEX.prototype.getMarkPrice = function getMarkPrice() {
+  return new Promise((resolve, reject) => {
+    const verb = 'GET';
+    const path = '/api/v1/position';
+    const b = {
+      filter: { symbol: 'XBTUSD' },
+      columns: ['markPrice'],
+      count: 1,
+    };
+    const body = JSON.stringify(b);
+    const headers = bmHeaders(verb, path, body);
+
+    const request = unirest.get(config.api.resthost + path);
+    request
+      .header(headers)
+      .send(body)
+      .end((response) => {
+        if (response.code === 200) resolve(response.body.markPrice);
+        reject(response);
+      });
+  });
+};
+
 BitMEX.prototype.adjustMargin = function adjustMargin(margin) {
   return new Promise((resolve, reject) => {
     const verb = 'POST';
