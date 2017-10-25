@@ -305,8 +305,9 @@ function trade(response, b, enter, exit, args) {
     process.stdout.write(`${currCandle.high}\t`);
     process.stdout.write(`${currCandle.low}\t`);
     process.stdout.write(`${currCandle.close}\t`);
+    process.stdout.write(`${currCandle.ema1}\t`);
+    process.stdout.write(`${currCandle.ema2}\t`);
     process.stdout.write(`${currCandle.bband1high}\t`);
-    process.stdout.write(`${currCandle.bband1mid}\t`);
     process.stdout.write(`${currCandle.bband1low}\t`);
     process.stdout.write(`${activeTrade}\t`);
     process.stdout.write(`${orderType}\t`);

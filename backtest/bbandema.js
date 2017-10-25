@@ -1,21 +1,19 @@
 const utils = require('../utils.js');
 const trade = require('./backtesttrade.js');
 
-// STRATEGY 9: Bollinger Bands (Mean reverting)
+// STRATEGY 10: Bollinger Bands with EMA (Mean reversion towards trend)
 
 function enter(curr) {
   const {
-    high, low, bband1high, bband1low,
+    high, low, bband1high, bband1low, ema1, ema2,
   } = curr;
 
-  // Mean reverting bollinger Bands
-  // Take a short when price pierces high band
-  // Take a long when price pierces low band
-  // This is with the expectation that price will quickly revert back
-  // (Of course, when it's in a trend this hardly happens, for experimental purposes)
+  // Mean reversion in the direction of the trend
+  // Take a long when price crosses lower band and emas show trending higher
+  // Take a short when price crosses higher band and emas show trending lower
 
-  if (high >= bband1high) return [true, 'SHORT'];
-  if (low <= bband1low) return [true, 'LONG'];
+  if (ema1 > ema2 && low <= bband1low) return [true, 'LONG'];
+  if (ema2 > ema1 && high >= bband1high) return [true, 'SHORT'];
   return [false, ''];
 }
 
@@ -35,10 +33,12 @@ function exit(curr, orderType) {
   return false;
 }
 
-function bollinger(response, bband1, bband1dev, b) {
+function bollinger(response, bband1, bband1dev, ema1, ema2, b) {
   const args = {
     bband1,
     bband1dev,
+    ema1,
+    ema2,
   };
   const [balance, drawdown] = trade.trade(response, b, enter, exit, args);
   return [balance, drawdown];
@@ -46,16 +46,18 @@ function bollinger(response, bband1, bband1dev, b) {
 
 function main(response, balance) {
   console.log('============================================================');
-  console.log('Strategy 9: Bollinger Bands (Mean reverting)');
-  console.log('Short when high > high band, Long when low < low band');
+  console.log('Strategy 10: Bollinger Bands with EMA (Mean reversion towards trend)');
+  console.log('Long when low < low band and ema trends higher');
+  console.log('Short when high > high and and ema trends lower');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
-
   /*
   const bband1 = 20;
   const bband1dev = 2;
+  const ema1 = 30;
+  const ema2 = 90;
 
-  const [balanceLeft, maxDrawdown] = bollinger(response, bband1, bband1dev, balance);
+  const [balanceLeft, maxDrawdown] = bollinger(response, bband1, bband1dev, ema1, ema2, balance);
   const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
 
   console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
@@ -70,6 +72,8 @@ function main(response, balance) {
 
     const bband1 = i;
     const bband1dev = 2;
+    const ema1 = 30;
+    const ema2 = 90;
 
     // Repeat 100x to normalize data (since it includes random slippage
     // that might will skew results in minimal tests)
@@ -78,7 +82,7 @@ function main(response, balance) {
 
     const norm = 100;
     for (let j = 0; j < norm; j += 1) {
-      const [tmpBalance, tmpDrawdown] = bollinger(response, bband1, bband1dev, balance);
+      const [tmpBalance, tmpDrawdown] = bollinger(response, bband1, bband1dev, ema1, ema2, balance);
       bal += tmpBalance;
       draw += tmpDrawdown;
     }
