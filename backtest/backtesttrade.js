@@ -85,6 +85,8 @@ function entryPriceCalc(price, orderSize, orderType) {
 }
 
 function tradeValueCalc(price, entryPrice, orderType, orderSize) {
+  // Determines the current value of the trade
+
   let tradeValue = 0;
   if (orderType === 'LONG') {
     const ent = 1 / entryPrice;
@@ -112,6 +114,10 @@ function trade(response, b, enter, exit, args) {
   let ema2 = 35;
   let dc1 = 20;
   let dc2 = 40;
+  let bband1 = 20;
+  let bband1dev = 1;
+  let bband2 = 20;
+  let bband2dev = 2;
 
   if (typeof args.ma1 !== 'undefined') {
     ma1 = args.ma1; // eslint-disable-line
@@ -139,6 +145,19 @@ function trade(response, b, enter, exit, args) {
 
   if (typeof args.dc2 !== 'undefined') {
     dc2 = args.dc2; // eslint-disable-line
+  }
+
+  if (typeof args.bband1 !== 'undefined') {
+    bband1 = args.bband1; // eslint-disable-line
+  }
+  if (typeof args.bband1dev !== 'undefined') {
+    bband1dev = args.bband1dev; // eslint-disable-line
+  }
+  if (typeof args.bband2 !== 'undefined') {
+    bband2 = args.bband2; // eslint-disable-line
+  }
+  if (typeof args.bband2dev !== 'undefined') {
+    bband2dev = args.bband2dev; // eslint-disable-line
   }
 
   let balance = b;
@@ -193,6 +212,26 @@ function trade(response, b, enter, exit, args) {
     currCandle.dc2high = dc2high;
     currCandle.dc2mid = dc2mid;
     currCandle.dc2low = dc2low;
+
+    const [bband1high, bband1mid, bband1low] = fin.bollinger(
+      trades,
+      bband1,
+      bband1dev,
+      currCandle.close,
+    );
+    currCandle.bband1high = bband1high;
+    currCandle.bband1mid = bband1mid;
+    currCandle.bband1low = bband1low;
+
+    const [bband2high, bband2mid, bband2low] = fin.bollinger(
+      trades,
+      bband2,
+      bband2dev,
+      currCandle.close,
+    );
+    currCandle.bband2high = bband2high;
+    currCandle.bband2mid = bband2mid;
+    currCandle.bband2low = bband2low;
 
     trades.push(currCandle);
 
@@ -266,8 +305,9 @@ function trade(response, b, enter, exit, args) {
     process.stdout.write(`${currCandle.high}\t`);
     process.stdout.write(`${currCandle.low}\t`);
     process.stdout.write(`${currCandle.close}\t`);
-    process.stdout.write(`${currCandle.dc1high}\t`);
-    process.stdout.write(`${currCandle.dc1low}\t`);
+    process.stdout.write(`${currCandle.bband1high}\t`);
+    process.stdout.write(`${currCandle.bband1mid}\t`);
+    process.stdout.write(`${currCandle.bband1low}\t`);
     process.stdout.write(`${activeTrade}\t`);
     process.stdout.write(`${orderType}\t`);
     process.stdout.write(`${orderSize}\t`);
