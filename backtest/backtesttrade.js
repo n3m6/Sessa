@@ -1,5 +1,4 @@
 const utils = require('../utils.js');
-const strat = require('./backteststrategy.js').BacktestStrategy;
 const fin = require('./backtestfinancial.js').BacktestFinancial;
 
 // config constants
@@ -169,6 +168,8 @@ function trade(response, b, enter, exit, args) {
       volume: val.volume,
     };
 
+    // Calculate all various indicators
+
     const tsma = fin.sma(trades, ma1, currCandle.close);
     currCandle.ma1 = utils.roundTo(tsma, 2);
     const tsma2 = fin.sma(trades, ma2, currCandle.close);
@@ -199,7 +200,7 @@ function trade(response, b, enter, exit, args) {
 
     // check entry and exit here
     if (trades.length > Math.max(ma1, ma2, atr, ema1, ema2)) {
-      // skip first 16 rows
+      // skip first whatever rows depending on the maximum indicator value
       if (activeTrade) {
         // check for exit
         if (exit(currCandle, orderType)) {
@@ -217,7 +218,7 @@ function trade(response, b, enter, exit, args) {
           if (dhigh > balance) dhigh = balance;
           if (dlow < balance) dlow = balance;
 
-          // recheck for entry on other side
+          // recheck for entry on other side (after exiting previous trade)
           const [at, ot] = enter(currCandle);
           if (at) {
             // enter here
@@ -257,6 +258,7 @@ function trade(response, b, enter, exit, args) {
       tradeValue = tradeValueCalc(currCandle.close, entryPrice, orderType, orderSize);
     }
     /*
+    // LOG Verbose details of all the trades
     const d = new Date(parseInt(currCandle.timestamp, 10));
     const ttime = d.toISOString();
     process.stdout.write(`${ttime}\t`);
@@ -287,121 +289,11 @@ function trade(response, b, enter, exit, args) {
   return [balance, drawdown];
 }
 
-/** ********* STRATEGIES *********** */
-function simpleCrossOver(response, ma, atrVal, b) {
-  const args = {
-    ma1: ma,
-    atr: atrVal,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.simpleCrossOverEnter,
-    strat.simpleCrossOverExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-function doubleMA(response, ma1, ma2, b) {
-  const args = {
-    ma1,
-    ma2,
-  };
-  const [balance, drawdown] = trade(response, b, strat.doubleMAEnter, strat.doubleMAExit, args);
-  return [balance, drawdown];
-}
-
-function doubleMAFingertap(response, ma1, ma2, b) {
-  const args = {
-    ma1,
-    ma2,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.doubleMAFingertapEnter,
-    strat.doubleMAFingertapExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-function doubleEMA(response, ema1, ema2, b) {
-  const args = {
-    ema1,
-    ema2,
-  };
-  const [balance, drawdown] = trade(response, b, strat.doubleEMAEnter, strat.doubleEMAExit, args);
-  return [balance, drawdown];
-}
-
-function doubleEMAFingertap(response, ema1, ema2, b) {
-  const args = {
-    ema1,
-    ema2,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.doubleEMAFingertapEnter,
-    strat.doubleEMAFingertapExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-function donchian(response, dc1, b) {
-  const args = {
-    dc1,
-  };
-  const [balance, drawdown] = trade(response, b, strat.donchianEnter, strat.donchianExit, args);
-  return [balance, drawdown];
-}
-
-function donchianMid(response, dc1, b) {
-  const args = {
-    dc1,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.donchianMidEnter,
-    strat.donchianMidExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-function doubleDonchian(response, dc1, dc2, b) {
-  const args = {
-    dc1,
-    dc2,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.doubleDonchianEnter,
-    strat.doubleDonchianExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-/** ******************************** */
-
 module.exports = {
   katrmult,
   kmaxLoss,
   kmargin,
   kmaxBetSize,
   kfees,
-  simpleCrossOver,
-  doubleMA,
-  doubleMAFingertap,
-  doubleEMA,
-  doubleEMAFingertap,
-  donchian,
-  donchianMid,
-  doubleDonchian,
+  trade,
 };

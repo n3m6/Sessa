@@ -1,438 +1,133 @@
 const db = require('./backtestdb.js').BacktestDB;
-const utils = require('../utils.js');
-const trade = require('./backtesttrade.js');
 
-// FIXME the simple crossover function is fucked fix it !!!!
-// Also it's not accounting trade losses property during quick reversals. find out why
+const dma = require('./doublema.js');
+const don = require('./donchian.js');
+const donm = require('./donchianmid.js');
+const dodon = require('./doubledonchian.js');
+const dema = require('./doubleema.js');
+const demaf = require('./doubleemafingertap.js');
+const dmaf = require('./doublemafingertap.js');
+const mp = require('./movingaverageprice.js');
+
+/*
+To run: node backtest.js [arguments]
+*/
+
+function helpfile() {
+  console.log(`
+  To run: node backtest.js [arguments]
+  Arguments:
+
+  Strategies:
+  --movingavgprice | -mp      (Moving average price crossover)
+  --doublema | -dma           (Double moving average)
+  --doublemafinger | -dmaf    (Double moving average fingertap)
+  --doubleema | -dema         (Double exponential moving average)
+  --doubleemafinger | -demaf  (Double EMA fingertap)
+  --donchian | -don           (Donchian channels)
+  --donchianmid | -donm       (Donchian channel mid line crossover)
+  --doubledonchian | -dodon   (Double donchian channels)
+
+  --all | -a
+  Calculate results for all strategies avaialable.
+  Warning: Will take a long time complete.
+
+  General:
+  --help | -h
+  Get information on program command line arguments and options.
+
+  --version | -v
+  Display version information.
+
+  `);
+}
+
+function callall(response, balance) {
+  mp.main(response, balance);
+  dma.main(response, balance);
+  dmaf.main(response, balance);
+  dema.main(response, balance);
+  demaf.main(response, balance);
+  don.main(response, balance);
+  donm.main(response, balance);
+  dodon.main(response, balance);
+}
 
 db
   .getRange15Min()
   .then((response) => {
     const balance = 100;
 
-    // STRATEGY 1: Simple Single Moving Average Price Crossover
-    /*
-    const ma = 25;
-    const atrVal = 14;
-    const [balanceLeft, maxDrawdown] = trade.simpleCrossOver(response, ma, atrVal, balance);
-    const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
-    console.log(`Balance: ${balance}\t${balanceLeft}\t${utils.roundTo(percent * 100, 2)}%`);
-    */
-
-    console.log('============================================================');
-    console.log('Strategy 1: Moving Average Price Crossover Strategy');
-    console.log('\n');
-    console.log(`Starting Balance: ${balance}\n`);
-
-    console.log('\tBAL\tPnL\tDRAW');
-    for (let i = 5; i < 101; i += 5) {
-      process.stdout.write(`MA${i} `);
-
-      const ma = i;
-      const atrVal = 14;
-
-      // Repeat 100x to normalize data (since it includes random slippage
-      // that might will skew results in minimal tests)
-      let bal = 0;
-      let draw = 0;
-      for (let j = 0; j < 100; j += 1) {
-        const [tmpBalance, tmpDrawdown] = trade.simpleCrossOver(response, ma, atrVal, balance);
-        bal += tmpBalance;
-        draw += tmpDrawdown;
+    for (let i = 2; i < process.argv.length; i += 1) {
+      switch (process.argv[i]) {
+        case '--help':
+          helpfile();
+          break;
+        case '--movingavgprice':
+          mp.main(response, balance);
+          break;
+        case '-mp':
+          mp.main(response, balance);
+          break;
+        case '--doublema':
+          dma.main(response, balance);
+          break;
+        case '-dma':
+          dma.main(response, balance);
+          break;
+        case '--doublemafinger':
+          dmaf.main(response, balance);
+          break;
+        case '-dmaf':
+          dmaf.main(response, balance);
+          break;
+        case '--doubleema':
+          dema.main(response, balance);
+          break;
+        case '-dema':
+          dema.main(response, balance);
+          break;
+        case '--doubleemafinger':
+          demaf.main(response, balance);
+          break;
+        case '-demaf':
+          demaf.main(response, balance);
+          break;
+        case '--donchian':
+          don.main(response, balance);
+          break;
+        case '-don':
+          don.main(response, balance);
+          break;
+        case '--donchianmid':
+          donm.main(response, balance);
+          break;
+        case '-donm':
+          donm.main(response, balance);
+          break;
+        case '--doubledonchian':
+          dodon.main(response, balance);
+          break;
+        case '-dodon':
+          dodon.main(response, balance);
+          break;
+        case '-h':
+          helpfile();
+          break;
+        case '-a':
+          callall(response, balance);
+          break;
+        case '--all':
+          callall(response, balance);
+          break;
+        default:
+          console.log('Pass --help or -h as an argument to display help information.');
+          break;
       }
-
-      const balanceLeft = utils.roundTo(bal / 100, 2);
-      const portion = (balanceLeft - balance) / balance;
-      const percent = utils.roundTo(portion * 100, 2);
-
-      const maxDrawdown = draw / 100;
-      const drawdownPercent = utils.roundTo(maxDrawdown * 100, 2);
-
-      process.stdout.write(`\t${balanceLeft}\t${percent}%\t${drawdownPercent}%`);
-      process.stdout.write('\n');
-    }
-    console.log('============================================================');
-
-    // STRATEGY 2: Double MA Crossover
-    /*
-    const ma1 = 50;
-    const ma2 = 60;
-    const [balanceLeft, maxDrawdown] = trade.doubleMA(response, ma1, ma2, balance);
-    const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
-
-    console.log(
-      `Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
-        percent * 100,
-        2,
-      )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`,
-    );
-    */
-
-    console.log('============================================================');
-    console.log('Strategy 2: Double Moving Average Crossover Strategy');
-    console.log('\n');
-    console.log(`Starting Balance: ${balance}\n`);
-
-    for (let j = 5; j < 101; j += 5) {
-      process.stdout.write(`\t${j}`);
-    }
-    process.stdout.write('\n');
-
-    for (let i = 5; i < 101; i += 5) {
-      process.stdout.write(`MA${i}`);
-      for (let j = 5; j < 101; j += 5) {
-        if (i < j) {
-          // only process if the fast moving average is less than slower
-          const ma1 = i;
-          const ma2 = j;
-
-          let bal = 0;
-          let draw = 0;
-
-          for (let k = 0; k < 100; k += 1) {
-            const [tmpBalance, tmpDrawdown] = trade.doubleMA(response, ma1, ma2, balance);
-            bal += tmpBalance;
-            draw += tmpDrawdown;
-          }
-          bal /= 100;
-          draw /= 100;
-
-          let percent = (bal - balance) / balance;
-          percent *= 100;
-
-          process.stdout.write(`\t${utils.roundTo(percent, 2)}%`);
-        } else {
-          process.stdout.write('\t ');
-        }
-      }
-      process.stdout.write('\n');
     }
 
-    console.log('============================================================');
-
-    // STRATEGY 3: Double MA Fingertap
-    /*
-    const ma1 = 7;
-    const ma2 = 35;
-    const [balanceLeft, maxDrawdown] = trade.doubleMAFingertap(response, ma1, ma2, balance);
-    const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
-
-    console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
-      percent * 100,
-      2,
-    )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`);
-    */
-
-    console.log('============================================================');
-    console.log('Strategy 3: Double Moving Average Fingertap Strategy');
-    console.log('\n');
-    console.log(`Starting Balance: ${balance}\n`);
-
-    for (let j = 5; j < 101; j += 5) {
-      process.stdout.write(`\t${j}`);
-    }
-    process.stdout.write('\n');
-
-    for (let i = 5; i < 101; i += 5) {
-      process.stdout.write(`MA${i}`);
-      for (let j = 5; j < 101; j += 5) {
-        if (i < j) {
-          // only process if the fast moving average is less than slower
-          const ma1 = i;
-          const ma2 = j;
-
-          let bal = 0;
-          let draw = 0;
-
-          for (let k = 0; k < 100; k += 1) {
-            const [tmpBalance, tmpDrawdown] = trade.doubleMAFingertap(response, ma1, ma2, balance);
-            bal += tmpBalance;
-            draw += tmpDrawdown;
-          }
-          bal /= 100;
-          draw /= 100;
-
-          let percent = (bal - balance) / balance;
-          percent *= 100;
-
-          process.stdout.write(`\t${utils.roundTo(percent, 2)}%`);
-        } else {
-          process.stdout.write('\t ');
-        }
-      }
-      process.stdout.write('\n');
-    }
-
-    console.log('============================================================');
-
-    // STRATEGY 4: Double EMA Crossover
-    // Take long or shot depending on whether two fast moving EMAs crossover
-
-    console.log('============================================================');
-    console.log('Strategy 4: Double EMA Crossover');
-    console.log('enter/exit when two fast moving emas crossover');
-    console.log('\n');
-    console.log(`Starting Balance: ${balance}\n`);
-    /*
-    const ema1 = 8;
-    const ema2 = 35;
-
-    const [balanceLeft, maxDrawdown] = trade.doubleEMA(response, ema1, ema2, balance);
-    const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
-
-    console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
-      percent * 100,
-      2,
-    )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`);
-    */
-
-    for (let j = 5; j < 101; j += 5) {
-      process.stdout.write(`\t${j}`);
-    }
-    process.stdout.write('\n');
-
-    for (let i = 5; i < 101; i += 5) {
-      process.stdout.write(`EMA${i}`);
-      for (let j = 5; j < 101; j += 5) {
-        if (i < j) {
-          // only process if the fast moving average is less than slower
-          const ema1 = i;
-          const ema2 = j;
-
-          let bal = 0;
-          let draw = 0;
-
-          for (let k = 0; k < 100; k += 1) {
-            const [tmpBalance, tmpDrawdown] = trade.doubleEMA(response, ema1, ema2, balance);
-            bal += tmpBalance;
-            draw += tmpDrawdown;
-          }
-          bal /= 100;
-          draw /= 100;
-
-          let percent = (bal - balance) / balance;
-          percent *= 100;
-
-          process.stdout.write(`\t${utils.roundTo(percent, 2)}%`);
-        } else {
-          process.stdout.write('\t ');
-        }
-      }
-      process.stdout.write('\n');
-    }
-
-    console.log('============================================================');
-
-    // STRATEGY 5: Double EMA Fingertap
-
-    console.log('============================================================');
-    console.log('Strategy 5: Double EMA Fingertap');
-    console.log('enter/exit when price closes above/below two fast moving emas');
-    console.log('\n');
-    console.log(`Starting Balance: ${balance}\n`);
-    /*
-    const ema1 = 7;
-    const ema2 = 30;
-
-    const [balanceLeft, maxDrawdown] = trade.doubleEMAFingertap(response, ema1, ema2, balance);
-    const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
-
-    console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
-      percent * 100,
-      2,
-    )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`);
-    */
-
-    for (let j = 5; j < 101; j += 5) {
-      process.stdout.write(`\t${j}`);
-    }
-    process.stdout.write('\n');
-
-    for (let i = 5; i < 101; i += 5) {
-      process.stdout.write(`EMA${i}`);
-      for (let j = 5; j < 101; j += 5) {
-        if (i < j) {
-          // only process if the fast moving average is less than slower
-          const ema1 = i;
-          const ema2 = j;
-
-          let bal = 0;
-          let draw = 0;
-
-          for (let k = 0; k < 100; k += 1) {
-            const [tmpBalance, tmpDrawdown] = trade.doubleEMA(response, ema1, ema2, balance);
-            bal += tmpBalance;
-            draw += tmpDrawdown;
-          }
-          bal /= 100;
-          draw /= 100;
-
-          let percent = (bal - balance) / balance;
-          percent *= 100;
-
-          process.stdout.write(`\t${utils.roundTo(percent, 2)}%`);
-        } else {
-          process.stdout.write('\t ');
-        }
-      }
-      process.stdout.write('\n');
-    }
-
-    console.log('============================================================');
-
-    // STRATEGY 6: Donchian Channel
-
-    console.log('============================================================');
-    console.log('Strategy 6: Donchian Channel');
-    console.log('Long when closing price = high, short when closing = low');
-    console.log('\n');
-    console.log(`Starting Balance: ${balance}\n`);
-    /*
-    const dc1 = 70;
-
-    const [balanceLeft, maxDrawdown] = trade.donchian(response, dc1, balance);
-    const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
-
-    console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
-      percent * 100,
-      2,
-    )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`);
-    */
-
-    console.log('\tBAL\tPnL\tDRAW');
-    for (let i = 5; i < 101; i += 5) {
-      process.stdout.write(`MA${i} `);
-
-      const dc1 = i;
-
-      // Repeat 100x to normalize data (since it includes random slippage
-      // that might will skew results in minimal tests)
-      let bal = 0;
-      let draw = 0;
-      for (let j = 0; j < 100; j += 1) {
-        const [tmpBalance, tmpDrawdown] = trade.donchian(response, dc1, balance);
-        bal += tmpBalance;
-        draw += tmpDrawdown;
-      }
-
-      const balanceLeft = utils.roundTo(bal / 100, 2);
-      const portion = (balanceLeft - balance) / balance;
-      const percent = utils.roundTo(portion * 100, 2);
-
-      const maxDrawdown = draw / 100;
-      const drawdownPercent = utils.roundTo(maxDrawdown * 100, 2);
-
-      process.stdout.write(`\t${balanceLeft}\t${percent}%\t${drawdownPercent}%`);
-      process.stdout.write('\n');
-    }
-
-    console.log('============================================================');
-
-    // STRATEGY 7: Donchian Channel Mid Crossover
-
-    console.log('============================================================');
-    console.log('Strategy 7: Donchian Channel Mid Crossover');
-    console.log('Long when closing price = high, short when closing = low');
-    console.log('Close positions when they cross the mid line');
-    console.log('\n');
-    console.log(`Starting Balance: ${balance}\n`);
-
-    /*
-    const dc1 = 20;
-
-    const [balanceLeft, maxDrawdown] = trade.donchianMid(response, dc1, balance);
-    const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
-
-    console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
-      percent * 100,
-      2,
-    )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`);
-    */
-
-    console.log('\tBAL\tPnL\tDRAW');
-    for (let i = 5; i < 101; i += 5) {
-      process.stdout.write(`MA${i} `);
-
-      const dc1 = i;
-
-      // Repeat 100x to normalize data (since it includes random slippage
-      // that might will skew results in minimal tests)
-      let bal = 0;
-      let draw = 0;
-      for (let j = 0; j < 100; j += 1) {
-        const [tmpBalance, tmpDrawdown] = trade.donchianMid(response, dc1, balance);
-        bal += tmpBalance;
-        draw += tmpDrawdown;
-      }
-
-      const balanceLeft = utils.roundTo(bal / 100, 2);
-      const portion = (balanceLeft - balance) / balance;
-      const percent = utils.roundTo(portion * 100, 2);
-
-      const maxDrawdown = draw / 100;
-      const drawdownPercent = utils.roundTo(maxDrawdown * 100, 2);
-
-      process.stdout.write(`\t${balanceLeft}\t${percent}%\t${drawdownPercent}%`);
-      process.stdout.write('\n');
-    }
-
-    console.log('============================================================');
-
-    // STRATEGY 8: Double Donchian Channel
-
-    console.log('============================================================');
-    console.log('Strategy 8: Double Donchian Channel');
-    console.log('enter long/short when high/low crosses greater channel');
-    console.log('exit long/short when high/low crosses smaller channel');
-    console.log('\n');
-    console.log(`Starting Balance: ${balance}\n`);
-
-    /*
-    const dc1 = 20;
-    const dc2 = 40;
-
-    const [balanceLeft, maxDrawdown] = trade.doubleDonchian(response, dc1, dc2, balance);
-    const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
-
-    console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
-      percent * 100,
-      2,
-    )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`);
-    */
-
-    for (let j = 5; j < 101; j += 5) {
-      process.stdout.write(`\t${j}`);
-    }
-    process.stdout.write('\n');
-
-    for (let i = 5; i < 101; i += 5) {
-      process.stdout.write(`DC${i}`);
-      for (let j = 5; j < 101; j += 5) {
-        if (i < j) {
-          // only process if the fast moving average is less than slower
-          const dc1 = i;
-          const dc2 = j;
-
-          let bal = 0;
-          let draw = 0;
-
-          for (let k = 0; k < 100; k += 1) {
-            const [tmpBalance, tmpDrawdown] = trade.doubleDonchian(response, dc1, dc2, balance);
-            bal += tmpBalance;
-            draw += tmpDrawdown;
-          }
-          bal /= 100;
-          draw /= 100;
-
-          let percent = (bal - balance) / balance;
-          percent *= 100;
-
-          process.stdout.write(`\t${utils.roundTo(percent, 2)}%`);
-        } else {
-          process.stdout.write('\t ');
-        }
-      }
-      process.stdout.write('\n');
+    if (process.argv.length < 3) {
+      helpfile();
     }
 
     console.log('============================================================');
