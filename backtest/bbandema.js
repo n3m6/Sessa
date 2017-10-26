@@ -52,6 +52,9 @@ function main(response, balance) {
   console.log('Short when high > high and and ema trends lower');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
+  console.log(`Normalization runs: ${bconfig.norm}`);
+  console.log(`Stop Loss Type: ${bconfig.stop}`);
+  console.log('\n');
   /*
   const bband1 = 20;
   const bband1dev = 2;

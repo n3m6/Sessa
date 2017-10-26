@@ -46,6 +46,9 @@ console.log(`Balance: ${balance}\t${balanceLeft}\t${utils.roundTo(percent * 100,
   console.log('Strategy 1: Moving Average Price Crossover Strategy');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
+  console.log(`Normalization runs: ${bconfig.norm}`);
+  console.log(`Stop Loss Type: ${bconfig.stop}`);
+  console.log('\n');
 
   console.log('\tBAL\tPnL\tDRAW');
   for (let i = 5; i < 101; i += 5) {

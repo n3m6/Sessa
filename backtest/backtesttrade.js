@@ -1,3 +1,4 @@
+const stopfunc = require('./bstoploss.js');
 const utils = require('../utils.js');
 const fin = require('./backtestfinancial.js').BacktestFinancial;
 
@@ -290,7 +291,8 @@ function trade(response, b, enter, exit, args) {
             entryPrice = entryPriceCalc(currCandle.close, orderSize, orderType);
           }
         } else {
-          // Move stop loss if not using fixed stop loss
+          // Move stop loss according to config definition
+          stopLoss = stopfunc.stop(stopLoss, orderType, currCandle);
         }
       } else {
         // check for entry
@@ -336,6 +338,7 @@ function trade(response, b, enter, exit, args) {
     process.stdout.write(`${activeTrade}\t`);
     process.stdout.write(`${orderType}\t`);
     process.stdout.write(`${orderSize}\t`);
+    process.stdout.write(`${stopLoss}\t`);
     process.stdout.write(`${utils.roundTo(balance, 2)}\t`);
     process.stdout.write(`${utils.roundTo(tradeValue, 2)}\t`);
     process.stdout.write(`${utils.roundTo(balance + tradeValue, 2)}`);

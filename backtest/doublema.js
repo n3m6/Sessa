@@ -39,9 +39,12 @@ function main(response, balance) {
   console.log('Strategy 2: Double Moving Average Crossover Strategy');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
+  console.log(`Normalization runs: ${bconfig.norm}`);
+  console.log(`Stop Loss Type: ${bconfig.stop}`);
+  console.log('\n');
   /*
-  const ma1 = 70;
-  const ma2 = 95;
+  const ma1 = 50;
+  const ma2 = 60;
   const [balanceLeft, maxDrawdown] = doubleMA(response, ma1, ma2, balance);
   console.log(maxDrawdown);
   const percent = utils.roundTo((balanceLeft - balance) / balance, 4);

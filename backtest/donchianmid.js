@@ -45,6 +45,9 @@ function main(response, balance) {
   console.log('Close positions when they cross the mid line');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
+  console.log(`Normalization runs: ${bconfig.norm}`);
+  console.log(`Stop Loss Type: ${bconfig.stop}`);
+  console.log('\n');
 
   /*
 const dc1 = 20;

@@ -42,6 +42,9 @@ function main(response, balance) {
   console.log('Strategy 3: Double Moving Average Fingertap Strategy');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
+  console.log(`Normalization runs: ${bconfig.norm}`);
+  console.log(`Stop Loss Type: ${bconfig.stop}`);
+  console.log('\n');
   /*
 const ma1 = 7;
 const ma2 = 35;

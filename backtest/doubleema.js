@@ -41,6 +41,9 @@ function main(response, balance) {
   console.log('enter/exit when two fast moving emas crossover');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
+  console.log(`Normalization runs: ${bconfig.norm}`);
+  console.log(`Stop Loss Type: ${bconfig.stop}`);
+  console.log('\n');
   /*
   const ema1 = 30;
   const ema2 = 95;

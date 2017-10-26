@@ -43,6 +43,9 @@ function main(response, balance) {
   console.log('Long when closing price = high, short when closing = low');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
+  console.log(`Normalization runs: ${bconfig.norm}`);
+  console.log(`Stop Loss Type: ${bconfig.stop}`);
+  console.log('\n');
   /*
 const dc1 = 70;
 

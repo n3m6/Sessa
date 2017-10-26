@@ -42,6 +42,9 @@ function main(response, balance) {
   console.log('enter/exit when price closes above/below two fast moving emas');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
+  console.log(`Normalization runs: ${bconfig.norm}`);
+  console.log(`Stop Loss Type: ${bconfig.stop}`);
+  console.log('\n');
   /*
 const ema1 = 7;
 const ema2 = 30;

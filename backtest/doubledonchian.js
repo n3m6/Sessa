@@ -45,6 +45,9 @@ function main(response, balance) {
   console.log('exit long/short when high/low crosses smaller channel');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
+  console.log(`Normalization runs: ${bconfig.norm}`);
+  console.log(`Stop Loss Type: ${bconfig.stop}`);
+  console.log('\n');
 
   /*
 const dc1 = 20;
