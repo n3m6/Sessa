@@ -2,7 +2,7 @@ const trade = require('./trade').Trade;
 const strategy = require('./strategy').Strategy;
 const db = require('./db').Db;
 const orderlog = require('./orderlog').OrderLog;
-const config = require('./config');
+const stopfunc = require('./stoploss.js');
 
 const Engine = function Engine() {};
 
@@ -33,33 +33,6 @@ function exitTrade(timestamp, close) {
       })
       .catch(reply => reject(reply));
   });
-}
-
-function calcStopLossMovement(args, dbStop) {
-  // calculate by how much we should trail the stop loss
-  const { open, close, orderType } = args;
-
-  // calc for LONG positions
-  if (orderType === 'LONG') {
-    if (close > open) {
-      const candleSize = parseFloat(close) - parseFloat(open);
-      const moveSize = Math.round(candleSize * config.stopTrail);
-      const newPrice = Math.round(parseFloat(dbStop) + moveSize);
-
-      return [true, newPrice];
-    }
-    return [false, dbStop];
-  }
-
-  // calc for SHORT positions
-  if (open > close) {
-    const candleSize = parseFloat(open) - parseFloat(close);
-    const moveSize = Math.round(candleSize * config.stopTrail);
-    const newPrice = Math.round(parseFloat(dbStop) - moveSize);
-
-    return [true, newPrice];
-  }
-  return [false, dbStop]; // move: true or false, newprice
 }
 
 Engine.prototype.processTrade = function processTrade(lastCandle) {
@@ -112,7 +85,8 @@ Engine.prototype.processTrade = function processTrade(lastCandle) {
               db
                 .getStopLoss()
                 .then((dbStop) => {
-                  const [stopMove, newPrice] = calcStopLossMovement(args, dbStop);
+                  // Determine whether we need to move stop loss
+                  const [stopMove, newPrice] = stopfunc.stop(dbStop, args);
                   if (stopMove) {
                     // console.log('moving stop loss');
                     trade.amendStoploss(newPrice).catch(console.error);

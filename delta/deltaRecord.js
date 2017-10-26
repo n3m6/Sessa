@@ -81,7 +81,7 @@ DeltaRecord.prototype.process = function process(data) {
   const nixtime = jsDate.getTime();
 
   db
-    .get1MinLast50()
+    .get1MinLast100()
     .then((response) => {
       // IF check whether there are records in the db
       // console.log('records are empty');
@@ -153,7 +153,7 @@ DeltaRecord.prototype.process = function process(data) {
           ] = fiveMinuteProcessing(lastFive);
 
           db
-            .get5MinLast50()
+            .get5MinLast100()
             .then((responseFive) => {
               const lastCandleFive = {
                 open: openFive,
@@ -222,7 +222,7 @@ DeltaRecord.prototype.process = function process(data) {
           ] = fifteenMinuteProcessing(lastFifteen);
 
           db
-            .get15MinLast50()
+            .get15MinLast100()
             .then((responseFifteen) => {
               const lastCandleFifteen = {
                 open: openFifteen,

@@ -19,11 +19,11 @@ client.on('error', (err) => {
 });
 
 const DeltaDB = function DeltaDB() {};
-
-DeltaDB.prototype.get1MinLast50 = function get1MinLast50() {
+// FIXME should get last 101 records
+DeltaDB.prototype.get1MinLast100 = function get1MinLast100() {
   return new Promise((resolve, reject) => {
     const endTime = new Date().getTime();
-    const startTime = endTime - 3060000; // 51*60*1000 (51 minutes in millisecs)
+    const startTime = endTime - 6060000; // 101*60*1000 (51 minutes in millisecs)
 
     const args = [bitmex1MinPrefix, startTime, endTime];
 
@@ -50,10 +50,10 @@ DeltaDB.prototype.get1MinLast50 = function get1MinLast50() {
   });
 };
 
-DeltaDB.prototype.get5MinLast50 = function get5MinLast50() {
+DeltaDB.prototype.get5MinLast100 = function get5MinLast100() {
   return new Promise((resolve, reject) => {
     const endTime = new Date().getTime();
-    const startTime = endTime - 15300000; // 51*5*60*1000 (255 minutes in millisecs)
+    const startTime = endTime - 30300000; // 101*5*60*1000 (255 minutes in millisecs)
     const args = [bitmex5MinPrefix, startTime, endTime];
 
     // eslint-disable-next-line
@@ -81,10 +81,10 @@ DeltaDB.prototype.get5MinLast50 = function get5MinLast50() {
   });
 };
 
-DeltaDB.prototype.get15MinLast50 = function get15MinLast50() {
+DeltaDB.prototype.get15MinLast100 = function get15MinLast100() {
   return new Promise((resolve, reject) => {
     const endTime = new Date().getTime();
-    const startTime = endTime - 45900000; // 51*15*60*1000 (765 minutes in millisecs
+    const startTime = endTime - 90900000; // 101*15*60*1000 (765 minutes in millisecs
     const args = [bitmex15MinPrefix, startTime, endTime];
 
     // eslint-disable-next-line

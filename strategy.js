@@ -14,10 +14,16 @@ const StratEnum = {
   Often used in trend following systems
   */
   SIMPLECROSSOVER: 'simpleCrossOver',
+  /*
+  Simple trend following system based on two moving averages.
+  Go long when fast ma is above slow ma.
+  Go short when fast ma is below slow ma.
+  */
+  DOUBLEMA: 'doubleMA',
 };
 
 // CHANGE THIS VALUE TO CHANGE STRAT
-const defaultstrat = StratEnum.SIMPLECROSSOVER;
+const defaultstrat = StratEnum.DOUBLEMA;
 
 const strats = [];
 strats.threeGreen = [];
@@ -72,6 +78,30 @@ strats.simpleCrossOver.exit = function simpleCrossOverExit(args) {
   }
   if (orderType === 'SHORT') {
     if (open < sma1 && close > sma1) return true;
+    return false;
+  }
+  return false;
+};
+
+strats.doubleMA = [];
+
+strats.doubleMA.enter = function doubleMAEnter(args) {
+  const { sma1, sma2 } = args;
+
+  if (sma1 > sma2) return [true, 'LONG'];
+  if (sma2 > sma1) return [true, 'SHORT'];
+  return [false, ''];
+};
+
+strats.doubleMA.exit = function doubleMAExit(args) {
+  const { sma1, sma2, orderType } = args;
+
+  if (orderType === 'LONG') {
+    if (sma2 > sma1) return true;
+    return false;
+  }
+  if (orderType === 'SHORT') {
+    if (sma1 > sma2) return true;
     return false;
   }
   return false;
