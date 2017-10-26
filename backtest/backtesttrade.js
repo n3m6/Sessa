@@ -106,6 +106,16 @@ function tradeValueCalc(price, entryPrice, orderType, orderSize) {
   return tradeValue;
 }
 
+function stopLossStopTrade(stopLoss, orderType, high, low) {
+  // return true if trade is stopped
+  if (orderType === 'LONG') {
+    if (low < stopLoss) return true;
+    return false;
+  }
+  if (high > stopLoss) return true;
+  return false;
+}
+
 function trade(response, b, enter, exit, args) {
   let ma1 = 25;
   let ma2 = 40;
@@ -235,7 +245,18 @@ function trade(response, b, enter, exit, args) {
 
     trades.push(currCandle);
 
-    // Do stop loss here before taking or exiting trades
+    // Stop loss calculation
+    if (activeTrade) {
+      const stopped = stopLossStopTrade(stopLoss, orderType, currCandle.high, currCandle.low);
+      if (stopped) {
+        // stop trade, add tradevalue to balance
+        // console.log(`Stopped at stop loss: ${stopLoss}`);
+        tradeValue = tradeValueCalc(stopLoss, entryPrice, orderType, orderSize);
+        balance += tradeValue;
+        tradeValue = 0;
+        activeTrade = false;
+      }
+    }
 
     // check entry and exit here
     if (trades.length > Math.max(ma1, ma2, atr, ema1, ema2)) {
@@ -253,10 +274,6 @@ function trade(response, b, enter, exit, args) {
 
           tradeValue = 0; // change to zero after it's added to balance
 
-          // calculate drawdown
-          if (dhigh > balance) dhigh = balance;
-          if (dlow < balance) dlow = balance;
-
           // recheck for entry on other side (after exiting previous trade)
           const [at, ot] = enter(currCandle);
           if (at) {
@@ -272,6 +289,8 @@ function trade(response, b, enter, exit, args) {
             balance -= orderSize / kmargin;
             entryPrice = entryPriceCalc(currCandle.close, orderSize, orderType);
           }
+        } else {
+          // Move stop loss if not using fixed stop loss
         }
       } else {
         // check for entry
@@ -292,10 +311,15 @@ function trade(response, b, enter, exit, args) {
       }
     }
 
-    // calculate tradeValue
+    // calculate final tradeValue for row
     if (activeTrade) {
       tradeValue = tradeValueCalc(currCandle.close, entryPrice, orderType, orderSize);
     }
+
+    // calculate drawdown
+    if (dhigh > balance + tradeValue) dhigh = balance + tradeValue;
+    if (dlow < balance + tradeValue) dlow = balance + tradeValue;
+
     /*
     // LOG Verbose details of all the trades
     const d = new Date(parseInt(currCandle.timestamp, 10));
@@ -320,7 +344,6 @@ function trade(response, b, enter, exit, args) {
   });
 
   // Return accumulated values
-
   if (activeTrade) {
     balance += tradeValue;
   }

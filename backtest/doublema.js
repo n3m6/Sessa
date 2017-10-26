@@ -39,19 +39,17 @@ function main(response, balance) {
   console.log('Strategy 2: Double Moving Average Crossover Strategy');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
-
   /*
-  const ma1 = 50;
-  const ma2 = 60;
-  const [balanceLeft, maxDrawdown] = trade.doubleMA(response, ma1, ma2, balance);
+  const ma1 = 70;
+  const ma2 = 95;
+  const [balanceLeft, maxDrawdown] = doubleMA(response, ma1, ma2, balance);
+  console.log(maxDrawdown);
   const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
 
-  console.log(
-    `Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
-      percent * 100,
-      2,
-    )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`,
-  );
+  console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
+    percent * 100,
+    2,
+  )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`);
   */
 
   for (let j = 5; j < 101; j += 5) {

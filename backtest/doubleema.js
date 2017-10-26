@@ -42,17 +42,17 @@ function main(response, balance) {
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
   /*
-const ema1 = 8;
-const ema2 = 35;
+  const ema1 = 30;
+  const ema2 = 95;
 
-const [balanceLeft, maxDrawdown] = trade.doubleEMA(response, ema1, ema2, balance);
-const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
+  const [balanceLeft, maxDrawdown] = trade.doubleEMA(response, ema1, ema2, balance);
+  const percent = utils.roundTo((balanceLeft - balance) / balance, 4);
 
-console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
-  percent * 100,
-  2,
-)}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`);
-*/
+  console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roundTo(
+    percent * 100,
+    2,
+  )}%  ${utils.roundTo(maxDrawdown * 100, 2)}%`);
+  */
 
   for (let j = 5; j < 101; j += 5) {
     process.stdout.write(`\t${j}`);
