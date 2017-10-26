@@ -1,3 +1,4 @@
+const bconfig = require('./bconfig.js');
 const utils = require('../utils.js');
 const trade = require('./backtesttrade.js');
 
@@ -69,7 +70,7 @@ console.log(`Balance: ${balance}\t${utils.roundTo(balanceLeft, 2)}\t${utils.roun
         let bal = 0;
         let draw = 0;
 
-        const norm = 100;
+        const { norm } = bconfig;
         for (let k = 0; k < norm; k += 1) {
           const [tmpBalance, tmpDrawdown] = doubleEMA(response, ema1, ema2, balance);
           bal += tmpBalance;

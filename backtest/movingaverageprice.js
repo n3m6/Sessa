@@ -1,3 +1,4 @@
+const bconfig = require('./bconfig.js');
 const utils = require('../utils.js');
 const trade = require('./backtesttrade.js');
 
@@ -57,7 +58,7 @@ console.log(`Balance: ${balance}\t${balanceLeft}\t${utils.roundTo(percent * 100,
     // that might will skew results in minimal tests)
     let bal = 0;
     let draw = 0;
-    const norm = 100;
+    const { norm } = bconfig;
     for (let j = 0; j < norm; j += 1) {
       const [tmpBalance, tmpDrawdown] = simpleCrossOver(response, ma, atrVal, balance);
       bal += tmpBalance;

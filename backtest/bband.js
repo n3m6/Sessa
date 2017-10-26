@@ -1,3 +1,4 @@
+const bconfig = require('./bconfig.js');
 const utils = require('../utils.js');
 const trade = require('./backtesttrade.js');
 
@@ -76,7 +77,7 @@ function main(response, balance) {
     let bal = 0;
     let draw = 0;
 
-    const norm = 100;
+    const { norm } = bconfig;
     for (let j = 0; j < norm; j += 1) {
       const [tmpBalance, tmpDrawdown] = bollinger(response, bband1, bband1dev, balance);
       bal += tmpBalance;
