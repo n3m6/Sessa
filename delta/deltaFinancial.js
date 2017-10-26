@@ -9,7 +9,7 @@ DeltaFinancial.prototype.sma = function sma(data, range, currClose) {
     let total = as.reduce((sum, value) => sum + parseFloat(value.close), 0);
     total += parseFloat(currClose);
     const divider = as.length + 1;
-    return utils.roundTo(total / divider, config.significant);
+    return utils.roundTo(total / divider, config.indicatorSignificant);
   }
   return currClose;
 };
@@ -44,7 +44,7 @@ DeltaFinancial.prototype.rsi = function rsi(data, range, current) {
 
     avggain = utils.roundTo(avggain, 8);
     avgloss = utils.roundTo(avgloss, 8);
-    rsitmp = utils.roundTo(rsitmp, config.significant);
+    rsitmp = utils.roundTo(rsitmp, config.indicatorSignificant);
 
     return [avggain, avgloss, rsitmp];
   }
@@ -73,7 +73,7 @@ DeltaFinancial.prototype.rsi = function rsi(data, range, current) {
   let rsitmp = 100 - iRS;
   avggain = utils.roundTo(avggain, 8);
   avgloss = utils.roundTo(avgloss, 8);
-  rsitmp = utils.roundTo(rsitmp, config.significant);
+  rsitmp = utils.roundTo(rsitmp, config.indicatorSignificant);
 
   return [avggain, avgloss, rsitmp];
 };
@@ -89,8 +89,8 @@ function macdEMA(previousEMA, currentClose, range) {
 DeltaFinancial.prototype.macd = function macd(data, range1, range2, signalRange, current) {
   if (data[0] === null) {
     const d = current.close;
-    const ema12 = utils.roundTo(d, config.significant);
-    const ema26 = utils.roundTo(d, config.significant);
+    const ema12 = utils.roundTo(d, config.indicatorSignificant);
+    const ema26 = utils.roundTo(d, config.indicatorSignificant);
     const signal = 0;
     const tmacd = 0.01;
     return [ema12, ema26, signal, tmacd];
@@ -105,8 +105,8 @@ DeltaFinancial.prototype.macd = function macd(data, range1, range2, signalRange,
   const range2EMA = macdEMA(pre26ema, d, range2);
   const macdLine = range1EMA - range2EMA;
 
-  const ema12 = utils.roundTo(range1EMA, config.significant);
-  const ema26 = utils.roundTo(range2EMA, config.significant);
+  const ema12 = utils.roundTo(range1EMA, config.indicatorSignificant);
+  const ema26 = utils.roundTo(range2EMA, config.indicatorSignificant);
   const signal = utils.roundTo(macdEMA(presignal, macdLine, signalRange), 4);
   const tmacd = utils.roundTo(macdLine - signal, 4);
 

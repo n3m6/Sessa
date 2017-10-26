@@ -14,37 +14,43 @@ const StratEnum = {
   Often used in trend following systems
   */
   SIMPLECROSSOVER: 'simpleCrossOver',
+  /*
+  Simple trend following system based on two moving averages.
+  Go long when fast ma is above slow ma.
+  Go short when fast ma is below slow ma.
+  */
+  DOUBLEMA: 'doubleMA',
 };
 
 // CHANGE THIS VALUE TO CHANGE STRAT
-const defaultstrat = StratEnum.SIMPLECROSSOVER;
+const defaultstrat = StratEnum.DOUBLEMA;
 
 const strats = [];
 strats.threeGreen = [];
 strats.threeGreen.enter = function threeGreenEnter(args) {
   const {
-    close, sma20, macd, rsi,
+    close, sma1, macd, rsi,
   } = args;
   const rsiHigh = 60;
   const rsiLow = 40;
 
-  if (sma20 > close && macd < 0 && rsi < rsiLow) {
+  if (sma1 > close && macd < 0 && rsi < rsiLow) {
     return [true, 'SHORT'];
   }
-  if (sma20 < close && macd > 0 && rsi > rsiHigh) {
+  if (sma1 < close && macd > 0 && rsi > rsiHigh) {
     return [true, 'LONG'];
   }
   return [false, ''];
 };
 
 strats.threeGreen.exit = function threeGreenExit(args) {
-  const { close, sma20, orderType } = args;
+  const { close, sma1, orderType } = args;
   if (orderType === 'LONG') {
-    if (close < sma20) return true;
+    if (close < sma1) return true;
     return false;
   }
   if (orderType === 'SHORT') {
-    if (close > sma20) return true;
+    if (close > sma1) return true;
 
     return false;
   }
@@ -53,25 +59,49 @@ strats.threeGreen.exit = function threeGreenExit(args) {
 
 strats.simpleCrossOver = [];
 strats.simpleCrossOver.enter = function simpleCrossOverEnter(args) {
-  const { open, close, sma20 } = args;
+  const { open, close, sma1 } = args;
 
   // console.log(`open: ${open} close: ${close} sma20: ${sma20}`);
-  if (open > sma20 && close < sma20) return [true, 'SHORT'];
-  if (open < sma20 && close > sma20) return [true, 'LONG'];
+  if (open > sma1 && close < sma1) return [true, 'SHORT'];
+  if (open < sma1 && close > sma1) return [true, 'LONG'];
 
   return [false, ''];
 };
 
 strats.simpleCrossOver.exit = function simpleCrossOverExit(args) {
   const {
-    open, close, sma20, orderType,
+    open, close, sma1, orderType,
   } = args;
   if (orderType === 'LONG') {
-    if (open > sma20 && close < sma20) return true;
+    if (open > sma1 && close < sma1) return true;
     return false;
   }
   if (orderType === 'SHORT') {
-    if (open < sma20 && close > sma20) return true;
+    if (open < sma1 && close > sma1) return true;
+    return false;
+  }
+  return false;
+};
+
+strats.doubleMA = [];
+
+strats.doubleMA.enter = function doubleMAEnter(args) {
+  const { sma1, sma2 } = args;
+
+  if (sma1 > sma2) return [true, 'LONG'];
+  if (sma2 > sma1) return [true, 'SHORT'];
+  return [false, ''];
+};
+
+strats.doubleMA.exit = function doubleMAExit(args) {
+  const { sma1, sma2, orderType } = args;
+
+  if (orderType === 'LONG') {
+    if (sma2 > sma1) return true;
+    return false;
+  }
+  if (orderType === 'SHORT') {
+    if (sma1 > sma2) return true;
     return false;
   }
   return false;
