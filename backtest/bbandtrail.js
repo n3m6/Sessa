@@ -2,7 +2,7 @@ const bconfig = require('./bconfig.js');
 const utils = require('../utils.js');
 const trade = require('./backtesttrade.js');
 
-// STRATEGY 10: Bollinger Bands with EMA (Mean reversion towards trend)
+// STRATEGY 11: Bollinger Bands with EMA (using trailing stop loss)
 
 function enter(curr) {
   const {
@@ -19,18 +19,20 @@ function enter(curr) {
 }
 
 function exit(curr, orderType) {
-  const {
-    high, low, bband1high, bband1low,
-  } = curr;
+  // No exit until trend changes
+
+  const { ema1, ema2 } = curr;
+
   if (orderType === 'LONG') {
-    if (high >= bband1high) return true;
+    if (ema2 > ema1) return true;
     return false;
   }
 
   if (orderType === 'SHORT') {
-    if (low <= bband1low) return true;
+    if (ema1 > ema2) return true;
     return false;
   }
+
   return false;
 }
 
@@ -47,9 +49,10 @@ function bollinger(response, bband1, bband1dev, ema1, ema2, b) {
 
 function main(response, balance) {
   console.log('============================================================');
-  console.log('Strategy 10: Bollinger Bands with EMA (Mean reversion towards trend)');
+  console.log('Strategy 11: Bollinger Bands/EMA (Mean reversion towards trend - trailing stop)');
   console.log('Long when low < low band and ema trends higher');
   console.log('Short when high > high and and ema trends lower');
+  console.log('Using trailing stop to exit, otherwise it holds the position until trend changes.');
   console.log('\n');
   console.log(`Starting Balance: ${balance}\n`);
   console.log(`Normalization runs: ${bconfig.norm}`);

@@ -10,6 +10,7 @@ const dmaf = require('./doublemafingertap.js');
 const mp = require('./movingaverageprice.js');
 const bb = require('./bband.js');
 const bbem = require('./bbandema.js');
+const bbt = require('./bbandtrail.js');
 
 /*
 To run: node backtest.js [arguments]
@@ -30,7 +31,8 @@ function helpfile() {
   --donchianmid | -donm       (Donchian channel mid line crossover)
   --doubledonchian | -dodon   (Double donchian channels)
   --bband | -bb               (Bollinger Bands - Mean Reversion)
-  --bbandema| -bbem           (Bollinger Bands w/ EMA - Mean reversion towards trend)
+  --bbandema | -bbem          (Bollinger Bands w/ EMA - Mean reversion towards trend)
+  --bbandtrail | -bbt         (Bollinger Bands w/ trailing stop, reversion towards trend)
 
   --all | -a
   Calculate results for all strategies avaialable.
@@ -57,6 +59,7 @@ function callall(response, balance) {
   dodon.main(response, balance);
   bb.main(response, balance);
   bbem.main(response, balance);
+  bbt.main(response, balance);
 }
 
 db
@@ -128,6 +131,12 @@ db
           break;
         case '-bbem':
           bbem.main(response, balance);
+          break;
+        case '--bbandtrail':
+          bbt.main(response, balance);
+          break;
+        case '-bbt':
+          bbt.main(response, balance);
           break;
         case '-h':
           helpfile();

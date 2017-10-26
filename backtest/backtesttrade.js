@@ -321,7 +321,6 @@ function trade(response, b, enter, exit, args) {
     // calculate drawdown
     if (dhigh > balance + tradeValue) dhigh = balance + tradeValue;
     if (dlow < balance + tradeValue) dlow = balance + tradeValue;
-
     /*
     // LOG Verbose details of all the trades
     const d = new Date(parseInt(currCandle.timestamp, 10));
