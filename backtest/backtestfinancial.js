@@ -13,6 +13,9 @@ BacktestFinancial.prototype.sma = function sma(data, range, currClose) {
   return currClose;
 };
 
+// using two ema functions because i'm picking out the previous val from data
+// FIXME maybe fix this later
+
 BacktestFinancial.prototype.ema1 = function ema1(data, range, close) {
   if (data.length + 1 < range) return close;
 
@@ -108,11 +111,37 @@ BacktestFinancial.prototype.donchian = function donchian(data, range, curr) {
     return [high, mid, low];
   }
 
+  // if this is the first element and the array is empty
   return [
     parseFloat(curr.high),
     (parseFloat(curr.high) + parseFloat(curr.low)) / 2,
     parseFloat(curr.low),
   ];
+};
+
+BacktestFinancial.prototype.bollinger = function bollinger(data, range, dev, close) {
+  if (data[0] != null) {
+    const as = utils.arraySlice(range - 1, data);
+    let total = as.reduce((sum, value) => sum + parseFloat(value.close), 0);
+    total += parseFloat(close);
+    const divider = as.length + 1;
+    const mid = utils.roundTo(total / divider, 2);
+
+    const arr = as.map(val => parseFloat(val.close));
+    const std = utils.stddev(arr);
+    const thigh = std * dev;
+    const tlow = std * dev;
+    const high = utils.roundTo(mid + thigh, 2);
+    const low = utils.roundTo(mid - tlow, 2);
+    return [high, mid, low];
+  }
+  const mid = parseFloat(close);
+  const std = utils.stddev([mid]);
+  const thigh = std * dev;
+  const tlow = std * dev;
+  const high = utils.roundTo(mid + thigh, 2);
+  const low = utils.roundTo(mid - tlow, 2);
+  return [high, mid, low];
 };
 
 exports.BacktestFinancial = new BacktestFinancial();

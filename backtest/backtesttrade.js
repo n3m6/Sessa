@@ -1,5 +1,5 @@
+const stopfunc = require('./bstoploss.js');
 const utils = require('../utils.js');
-const strat = require('./backteststrategy.js').BacktestStrategy;
 const fin = require('./backtestfinancial.js').BacktestFinancial;
 
 // config constants
@@ -86,6 +86,8 @@ function entryPriceCalc(price, orderSize, orderType) {
 }
 
 function tradeValueCalc(price, entryPrice, orderType, orderSize) {
+  // Determines the current value of the trade
+
   let tradeValue = 0;
   if (orderType === 'LONG') {
     const ent = 1 / entryPrice;
@@ -105,6 +107,16 @@ function tradeValueCalc(price, entryPrice, orderType, orderSize) {
   return tradeValue;
 }
 
+function stopLossStopTrade(stopLoss, orderType, high, low) {
+  // return true if trade is stopped
+  if (orderType === 'LONG') {
+    if (low < stopLoss) return true;
+    return false;
+  }
+  if (high > stopLoss) return true;
+  return false;
+}
+
 function trade(response, b, enter, exit, args) {
   let ma1 = 25;
   let ma2 = 40;
@@ -113,6 +125,10 @@ function trade(response, b, enter, exit, args) {
   let ema2 = 35;
   let dc1 = 20;
   let dc2 = 40;
+  let bband1 = 20;
+  let bband1dev = 1;
+  let bband2 = 20;
+  let bband2dev = 2;
 
   if (typeof args.ma1 !== 'undefined') {
     ma1 = args.ma1; // eslint-disable-line
@@ -142,6 +158,19 @@ function trade(response, b, enter, exit, args) {
     dc2 = args.dc2; // eslint-disable-line
   }
 
+  if (typeof args.bband1 !== 'undefined') {
+    bband1 = args.bband1; // eslint-disable-line
+  }
+  if (typeof args.bband1dev !== 'undefined') {
+    bband1dev = args.bband1dev; // eslint-disable-line
+  }
+  if (typeof args.bband2 !== 'undefined') {
+    bband2 = args.bband2; // eslint-disable-line
+  }
+  if (typeof args.bband2dev !== 'undefined') {
+    bband2dev = args.bband2dev; // eslint-disable-line
+  }
+
   let balance = b;
 
   // trade information
@@ -169,6 +198,8 @@ function trade(response, b, enter, exit, args) {
       volume: val.volume,
     };
 
+    // Calculate all various indicators
+
     const tsma = fin.sma(trades, ma1, currCandle.close);
     currCandle.ma1 = utils.roundTo(tsma, 2);
     const tsma2 = fin.sma(trades, ma2, currCandle.close);
@@ -193,13 +224,44 @@ function trade(response, b, enter, exit, args) {
     currCandle.dc2mid = dc2mid;
     currCandle.dc2low = dc2low;
 
+    const [bband1high, bband1mid, bband1low] = fin.bollinger(
+      trades,
+      bband1,
+      bband1dev,
+      currCandle.close,
+    );
+    currCandle.bband1high = bband1high;
+    currCandle.bband1mid = bband1mid;
+    currCandle.bband1low = bband1low;
+
+    const [bband2high, bband2mid, bband2low] = fin.bollinger(
+      trades,
+      bband2,
+      bband2dev,
+      currCandle.close,
+    );
+    currCandle.bband2high = bband2high;
+    currCandle.bband2mid = bband2mid;
+    currCandle.bband2low = bband2low;
+
     trades.push(currCandle);
 
-    // Do stop loss here before taking or exiting trades
+    // Stop loss calculation
+    if (activeTrade) {
+      const stopped = stopLossStopTrade(stopLoss, orderType, currCandle.high, currCandle.low);
+      if (stopped) {
+        // stop trade, add tradevalue to balance
+        // console.log(`Stopped at stop loss: ${stopLoss}`);
+        tradeValue = tradeValueCalc(stopLoss, entryPrice, orderType, orderSize);
+        balance += tradeValue;
+        tradeValue = 0;
+        activeTrade = false;
+      }
+    }
 
     // check entry and exit here
     if (trades.length > Math.max(ma1, ma2, atr, ema1, ema2)) {
-      // skip first 16 rows
+      // skip first whatever rows depending on the maximum indicator value
       if (activeTrade) {
         // check for exit
         if (exit(currCandle, orderType)) {
@@ -213,11 +275,7 @@ function trade(response, b, enter, exit, args) {
 
           tradeValue = 0; // change to zero after it's added to balance
 
-          // calculate drawdown
-          if (dhigh > balance) dhigh = balance;
-          if (dlow < balance) dlow = balance;
-
-          // recheck for entry on other side
+          // recheck for entry on other side (after exiting previous trade)
           const [at, ot] = enter(currCandle);
           if (at) {
             // enter here
@@ -232,6 +290,9 @@ function trade(response, b, enter, exit, args) {
             balance -= orderSize / kmargin;
             entryPrice = entryPriceCalc(currCandle.close, orderSize, orderType);
           }
+        } else {
+          // Move stop loss according to config definition
+          stopLoss = stopfunc.stop(stopLoss, orderType, currCandle);
         }
       } else {
         // check for entry
@@ -252,11 +313,16 @@ function trade(response, b, enter, exit, args) {
       }
     }
 
-    // calculate tradeValue
+    // calculate final tradeValue for row
     if (activeTrade) {
       tradeValue = tradeValueCalc(currCandle.close, entryPrice, orderType, orderSize);
     }
+
+    // calculate drawdown
+    if (dhigh > balance + tradeValue) dhigh = balance + tradeValue;
+    if (dlow < balance + tradeValue) dlow = balance + tradeValue;
     /*
+    // LOG Verbose details of all the trades
     const d = new Date(parseInt(currCandle.timestamp, 10));
     const ttime = d.toISOString();
     process.stdout.write(`${ttime}\t`);
@@ -264,11 +330,14 @@ function trade(response, b, enter, exit, args) {
     process.stdout.write(`${currCandle.high}\t`);
     process.stdout.write(`${currCandle.low}\t`);
     process.stdout.write(`${currCandle.close}\t`);
-    process.stdout.write(`${currCandle.dc1high}\t`);
-    process.stdout.write(`${currCandle.dc1low}\t`);
+    process.stdout.write(`${currCandle.ema1}\t`);
+    process.stdout.write(`${currCandle.ema2}\t`);
+    process.stdout.write(`${currCandle.bband1high}\t`);
+    process.stdout.write(`${currCandle.bband1low}\t`);
     process.stdout.write(`${activeTrade}\t`);
     process.stdout.write(`${orderType}\t`);
     process.stdout.write(`${orderSize}\t`);
+    process.stdout.write(`${stopLoss}\t`);
     process.stdout.write(`${utils.roundTo(balance, 2)}\t`);
     process.stdout.write(`${utils.roundTo(tradeValue, 2)}\t`);
     process.stdout.write(`${utils.roundTo(balance + tradeValue, 2)}`);
@@ -277,7 +346,6 @@ function trade(response, b, enter, exit, args) {
   });
 
   // Return accumulated values
-
   if (activeTrade) {
     balance += tradeValue;
   }
@@ -287,121 +355,11 @@ function trade(response, b, enter, exit, args) {
   return [balance, drawdown];
 }
 
-/** ********* STRATEGIES *********** */
-function simpleCrossOver(response, ma, atrVal, b) {
-  const args = {
-    ma1: ma,
-    atr: atrVal,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.simpleCrossOverEnter,
-    strat.simpleCrossOverExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-function doubleMA(response, ma1, ma2, b) {
-  const args = {
-    ma1,
-    ma2,
-  };
-  const [balance, drawdown] = trade(response, b, strat.doubleMAEnter, strat.doubleMAExit, args);
-  return [balance, drawdown];
-}
-
-function doubleMAFingertap(response, ma1, ma2, b) {
-  const args = {
-    ma1,
-    ma2,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.doubleMAFingertapEnter,
-    strat.doubleMAFingertapExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-function doubleEMA(response, ema1, ema2, b) {
-  const args = {
-    ema1,
-    ema2,
-  };
-  const [balance, drawdown] = trade(response, b, strat.doubleEMAEnter, strat.doubleEMAExit, args);
-  return [balance, drawdown];
-}
-
-function doubleEMAFingertap(response, ema1, ema2, b) {
-  const args = {
-    ema1,
-    ema2,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.doubleEMAFingertapEnter,
-    strat.doubleEMAFingertapExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-function donchian(response, dc1, b) {
-  const args = {
-    dc1,
-  };
-  const [balance, drawdown] = trade(response, b, strat.donchianEnter, strat.donchianExit, args);
-  return [balance, drawdown];
-}
-
-function donchianMid(response, dc1, b) {
-  const args = {
-    dc1,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.donchianMidEnter,
-    strat.donchianMidExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-function doubleDonchian(response, dc1, dc2, b) {
-  const args = {
-    dc1,
-    dc2,
-  };
-  const [balance, drawdown] = trade(
-    response,
-    b,
-    strat.doubleDonchianEnter,
-    strat.doubleDonchianExit,
-    args,
-  );
-  return [balance, drawdown];
-}
-
-/** ******************************** */
-
 module.exports = {
   katrmult,
   kmaxLoss,
   kmargin,
   kmaxBetSize,
   kfees,
-  simpleCrossOver,
-  doubleMA,
-  doubleMAFingertap,
-  doubleEMA,
-  doubleEMAFingertap,
-  donchian,
-  donchianMid,
-  doubleDonchian,
+  trade,
 };
