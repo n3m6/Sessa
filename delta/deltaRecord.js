@@ -4,7 +4,7 @@ const df = require('./deltaFinancial.js').DeltaFinancial;
 const utils = require('../utils');
 
 const DeltaRecord = function DeltaRecord() {
-  console.log('TIME\t\t\t\tOPEN\tHIGH\tLOW\tCLOSE\tTRADES\tVOL\tSMA20\tSMA30\tRSI\tMACD\tTR\tATR');
+  console.log('TIME\t\t\t\tOPEN\tHIGH\tLOW\tCLOSE\tTRADES\tVOL\tSMA1\tSMA2\tRSI\tMACD\tTR\tATR');
 };
 
 const bitmex1MinPrefix = config.bitmex1MinPrefix; // eslint-disable-line
@@ -98,8 +98,8 @@ DeltaRecord.prototype.process = function process(data) {
 
       // IF it's a new record not an entry that already exists
       if (parseInt(nixtime, 10) !== parseInt(lastTime, 10)) {
-        const sma20 = df.sma(response, config.sma20, close);
-        const sma30 = df.sma(response, config.sma30, close);
+        const sma1 = df.sma(response, config.sma1, close);
+        const sma2 = df.sma(response, config.sma2, close);
         const [rsiavggain, rsiavgloss, rsi] = df.rsi(response, config.rsi, lastCandle);
         const [mema12, mema26, msignal, macd] = df.macd(
           response,
@@ -121,8 +121,8 @@ DeltaRecord.prototype.process = function process(data) {
           trades,
           volume,
           vwap,
-          sma20,
-          sma30,
+          sma1,
+          sma2,
           rsi,
           rsiavggain,
           rsiavgloss,
@@ -161,8 +161,8 @@ DeltaRecord.prototype.process = function process(data) {
                 low: lowFive,
                 close: closeFive,
               };
-              const sma20Five = df.sma(responseFive, config.sma20, closeFive);
-              const sma30Five = df.sma(responseFive, config.sma30, closeFive);
+              const sma1Five = df.sma(responseFive, config.sma1, closeFive);
+              const sma2Five = df.sma(responseFive, config.sma2, closeFive);
               const [rsigainFive, rsilossFive, rsiFive] = df.rsi(
                 responseFive,
                 config.rsi,
@@ -188,8 +188,8 @@ DeltaRecord.prototype.process = function process(data) {
                 closeFive,
                 tradesFive,
                 volumeFive,
-                sma20Five,
-                sma30Five,
+                sma1Five,
+                sma2Five,
                 rsiFive,
                 rsigainFive,
                 rsilossFive,
@@ -230,8 +230,8 @@ DeltaRecord.prototype.process = function process(data) {
                 low: lowFifteen,
                 close: closeFifteen,
               };
-              const sma20Fifteen = df.sma(responseFifteen, config.sma20, closeFifteen);
-              const sma30Fifteen = df.sma(responseFifteen, config.sma30, closeFifteen);
+              const sma1Fifteen = df.sma(responseFifteen, config.sma1, closeFifteen);
+              const sma2Fifteen = df.sma(responseFifteen, config.sma2, closeFifteen);
               const [rsigainFifteen, rsilossFifteen, rsiFifteen] = df.rsi(
                 responseFifteen,
                 config.rsi,
@@ -261,8 +261,8 @@ DeltaRecord.prototype.process = function process(data) {
                 closeFifteen,
                 tradesFifteen,
                 volumeFifteen,
-                sma20Fifteen,
-                sma30Fifteen,
+                sma1Fifteen,
+                sma2Fifteen,
                 rsiFifteen,
                 rsigainFifteen,
                 rsilossFifteen,

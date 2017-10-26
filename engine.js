@@ -64,15 +64,15 @@ function calcStopLossMovement(args, dbStop) {
 
 Engine.prototype.processTrade = function processTrade(lastCandle) {
   // eslint-disable-next-line
-  const [timestamp, open, high, low, close, sma20, sma30, rsi, macd, tr, atr] = lastCandle;
+  const [timestamp, open, high, low, close, sma1, sma2, rsi, macd, tr, atr] = lastCandle;
   const args = {
     timestamp,
     open,
     high,
     low,
     close,
-    sma20,
-    sma30,
+    sma1,
+    sma2,
     rsi,
     macd,
     tr,
