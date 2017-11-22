@@ -5,7 +5,7 @@ const deltaRecord = require('./deltaRecord.js').DeltaRecord;
 const client = new BitmexClient(config.bitmexConfig);
 
 client.on('open', () => console.log('connection opened.'));
-client.on('error', err => console.log('caught error', err));
+client.on('error', err => console.error('caught error', err));
 client.on('close', () => console.log('connection closed.'));
 client.on('initialize', () => console.log('initialized, waiting for data'));
 

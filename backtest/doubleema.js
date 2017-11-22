@@ -5,14 +5,16 @@ const trade = require('./backtesttrade.js');
 // STRATEGY 4: Double EMA Crossover
 // Take long or shot depending on whether two fast moving EMAs crossover
 
-function enter(curr) {
+function enter(trades) {
+  const curr = trades[trades.length - 1];
   const { ema1, ema2 } = curr;
   if (ema1 > ema2) return [true, 'LONG'];
   if (ema2 > ema1) return [true, 'SHORT'];
   return [false, ''];
 }
 
-function exit(curr, orderType) {
+function exit(trades, orderType) {
+  const curr = trades[trades.length - 1];
   const { ema1, ema2 } = curr;
 
   if (orderType === 'LONG') {

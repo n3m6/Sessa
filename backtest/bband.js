@@ -4,7 +4,8 @@ const trade = require('./backtesttrade.js');
 
 // STRATEGY 9: Bollinger Bands (Mean reverting)
 
-function enter(curr) {
+function enter(trades) {
+  const curr = trades[trades.length - 1];
   const {
     high, low, bband1high, bband1low,
   } = curr;
@@ -20,7 +21,8 @@ function enter(curr) {
   return [false, ''];
 }
 
-function exit(curr, orderType) {
+function exit(trades, orderType) {
+  const curr = trades[trades.length - 1];
   const {
     high, low, bband1high, bband1low,
   } = curr;

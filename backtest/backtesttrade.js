@@ -118,6 +118,8 @@ function stopLossStopTrade(stopLoss, orderType, high, low) {
 }
 
 function trade(response, b, enter, exit, args) {
+  let balance = b;
+
   let ma1 = 25;
   let ma2 = 40;
   let atr = 14;
@@ -170,8 +172,6 @@ function trade(response, b, enter, exit, args) {
   if (typeof args.bband2dev !== 'undefined') {
     bband2dev = args.bband2dev; // eslint-disable-line
   }
-
-  let balance = b;
 
   // trade information
   let activeTrade = false;
@@ -264,7 +264,7 @@ function trade(response, b, enter, exit, args) {
       // skip first whatever rows depending on the maximum indicator value
       if (activeTrade) {
         // check for exit
-        if (exit(currCandle, orderType)) {
+        if (exit(trades, orderType)) {
           // exit here
           activeTrade = false;
           tradeValue = tradeValueCalc(currCandle.close, entryPrice, orderType, orderSize);
@@ -276,7 +276,7 @@ function trade(response, b, enter, exit, args) {
           tradeValue = 0; // change to zero after it's added to balance
 
           // recheck for entry on other side (after exiting previous trade)
-          const [at, ot] = enter(currCandle);
+          const [at, ot] = enter(trades);
           if (at) {
             // enter here
             activeTrade = true;
@@ -296,7 +296,7 @@ function trade(response, b, enter, exit, args) {
         }
       } else {
         // check for entry
-        const [at, ot] = enter(currCandle);
+        const [at, ot] = enter(trades);
         if (at) {
           // enter here
           activeTrade = true;

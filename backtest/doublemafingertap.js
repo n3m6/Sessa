@@ -4,14 +4,16 @@ const trade = require('./backtesttrade.js');
 
 // STRATEGY 3: Double MA Fingertap
 
-function enter(curr) {
+function enter(trades) {
+  const curr = trades[trades.length - 1];
   const { close, ma1, ma2 } = curr;
   if (ma1 > ma2 && close > ma1) return [true, 'LONG'];
   if (ma2 > ma1 && close < ma1) return [true, 'SHORT'];
   return [false, ''];
 }
 
-function exit(curr, orderType) {
+function exit(trades, orderType) {
+  const curr = trades[trades.length - 1];
   const { close, ma1, ma2 } = curr;
 
   if (orderType === 'LONG') {

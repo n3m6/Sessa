@@ -4,7 +4,8 @@ const trade = require('./backtesttrade.js');
 
 // STRATEGY 6: Donchian Channel
 
-function enter(curr) {
+function enter(trades) {
+  const curr = trades[trades.length - 1];
   const {
     high, low, dc1high, dc1low,
   } = curr;
@@ -13,7 +14,8 @@ function enter(curr) {
   return [false, ''];
 }
 
-function exit(curr, orderType) {
+function exit(trades, orderType) {
+  const curr = trades[trades.length - 1];
   const {
     high, low, dc1high, dc1low,
   } = curr;
