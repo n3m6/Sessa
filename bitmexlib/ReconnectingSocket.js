@@ -88,7 +88,7 @@ WebSocketClient.prototype.open = function open(url) {
         break;
       case 1011: // UNEXPECTED_CONDITION
         this.logError(`Code: ${code} Unexpected condition. Closing Websocket`);
-        reconnecting = true;
+        reconnecting = false;
         break;
       default:
         // Abnormal closure
