@@ -1,17 +1,13 @@
 {
   "name": "sessa",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "crypto trader",
   "main": "main.js",
   "scripts": {
     "test": "mocha",
     "start": "node main.js"
   },
-  "keywords": [
-    "crypto",
-    "trader",
-    "crytpocurrency"
-  ],
+  "keywords": ["crypto", "trader", "crytpocurrency"],
   "author": "Abdulla Faraz",
   "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
