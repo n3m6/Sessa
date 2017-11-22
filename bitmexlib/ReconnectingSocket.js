@@ -93,7 +93,7 @@ WebSocketClient.prototype.open = function open(url) {
       default:
         // Abnormal closure
         this.logError(`Code: ${code} Abnormal event. Websocket closed.`);
-        reconnecting = true;
+        reconnecting = false;
         break;
     }
     this.onclose(code);
