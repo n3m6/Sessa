@@ -3,14 +3,16 @@ const utils = require('../utils.js');
 const trade = require('./backtesttrade.js');
 
 // STRATEGY 5: Double EMA Fingertap
-function enter(curr) {
+function enter(trades) {
+  const curr = trades[trades.length - 1];
   const { close, ema1, ema2 } = curr;
   if (ema1 > ema2 && close > ema1) return [true, 'LONG'];
   if (ema2 > ema1 && close < ema1) return [true, 'SHORT'];
   return [false, ''];
 }
 
-function exit(curr, orderType) {
+function exit(trades, orderType) {
+  const curr = trades[trades.length - 1];
   const { close, ema1, ema2 } = curr;
 
   if (orderType === 'LONG') {

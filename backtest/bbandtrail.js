@@ -4,7 +4,8 @@ const trade = require('./backtesttrade.js');
 
 // STRATEGY 11: Bollinger Bands with EMA (using trailing stop loss)
 
-function enter(curr) {
+function enter(trades) {
+  const curr = trades[trades.length - 1];
   const {
     high, low, bband1high, bband1low, ema1, ema2,
   } = curr;
@@ -18,7 +19,8 @@ function enter(curr) {
   return [false, ''];
 }
 
-function exit(curr, orderType) {
+function exit(trades, orderType) {
+  const curr = trades[trades.length - 1];
   // No exit until trend changes
 
   const { ema1, ema2 } = curr;

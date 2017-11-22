@@ -3,7 +3,8 @@ const utils = require('../utils.js');
 const trade = require('./backtesttrade.js');
 
 // STRATEGY 7: Donchian Channel Mid Crossover
-function enter(curr) {
+function enter(trades) {
+  const curr = trades[trades.length - 1];
   const {
     high, low, dc1high, dc1low,
   } = curr;
@@ -12,7 +13,8 @@ function enter(curr) {
   return [false, ''];
 }
 
-function exit(curr, orderType) {
+function exit(trades, orderType) {
+  const curr = trades[trades.length - 1];
   const {
     high, low, close, dc1high, dc1mid, dc1low,
   } = curr;

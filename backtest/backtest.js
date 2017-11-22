@@ -11,6 +11,7 @@ const mp = require('./movingaverageprice.js');
 const bb = require('./bband.js');
 const bbem = require('./bbandema.js');
 const bbt = require('./bbandtrail.js');
+const tr = require('./truerange.js');
 
 /*
 To run: node backtest.js [arguments]
@@ -33,6 +34,7 @@ function helpfile() {
   --bband | -bb               (Bollinger Bands - Mean Reversion)
   --bbandema | -bbem          (Bollinger Bands w/ EMA - Mean reversion towards trend)
   --bbandtrail | -bbt         (Bollinger Bands w/ trailing stop, reversion towards trend)
+  --truerange | -tr           (Trend trade with True Range)
 
   --all | -a
   Calculate results for all strategies avaialable.
@@ -60,6 +62,7 @@ function callall(response, balance) {
   bb.main(response, balance);
   bbem.main(response, balance);
   bbt.main(response, balance);
+  tr.main(response, balance);
 }
 
 db
@@ -137,6 +140,12 @@ db
           break;
         case '-bbt':
           bbt.main(response, balance);
+          break;
+        case '--truerange':
+          tr.main(response, balance);
+          break;
+        case '-tr':
+          tr.main(response, balance);
           break;
         case '-h':
           helpfile();
