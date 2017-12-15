@@ -1,0 +1,7 @@
+#!/bin/sh
+# Put this file in your crontab to start Sessa when you restart your machine 
+
+export NODEJS_HOME=/usr/lib/nodejs/node-v8.5.0-linux-x64
+export PATH=$NODEJS_HOME/bin:$PATH
+forever --minUptime 50 --spinSleepTime 100 start /home/samurai/Sessa-run/delta/delta.js
+forever --minUptime 50 --spinSleepTime 100 start /home/samurai/Sessa-run/main.js
