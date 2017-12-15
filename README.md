@@ -8,10 +8,24 @@ requires a redis db.
 add redis db details to config.js
 npm install the modules in package.json dependencies.
 When in production change config.js key 'testnet' to false
+Create a keys.js file
 
 Not ideal, but this is how you change strategy and timeframe
 Strategy can be changed in the strategy.js file
 Time frame can be changed in the main.js file
+
+# keys.js
+```
+const keys = {};
+keys.testnet = {};
+keys.testnet.key = '';       // your testnet key
+keys.testnet.secret = '';    // your testnet secret
+keys.production = {};
+keys.production.key = '';   // your production key
+keys.production.secret = '';// your production secret
+module.exports = keys;
+
+```
 
 ## Running
 
