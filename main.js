@@ -5,6 +5,8 @@ const BitmexClient = require('./bitmexlib/bitmexlib.js');
 const omonitor = require('./ordermon.js').OrderMonitor;
 const pmonitor = require('./positionmon.js').PositionMonitor;
 
+// Delta pushes messages into the pubsub, main reads them
+
 const { port, host } = config.redis;
 const pubsub = redis.createClient(port, host, { no_ready_check: true });
 
@@ -18,7 +20,7 @@ const TimeEnum = {
   FIFTEEN: 15,
 };
 
-const timeframe = TimeEnum.FIFTEEN; // Change this to change strategy;
+const timeframe = TimeEnum.FIFTEEN; // Change this to change time frame;
 
 const client = new BitmexClient(config.bitmexConfig);
 
