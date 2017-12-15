@@ -42,6 +42,10 @@ A backtesting suite is included, just run backtest.js for additional help.
 
 This program uses an older modified version of the BitMEX library, since the original BitMEX library handled dropped connections extremely poorly. It has some issues since the original BitMEX library has been updated a few times. Ideally, in a future version we'll include a simple patch you could apply to whatever was the current BitMEX library.
 
+## Known Issues and Bugs
+
+See BUGS file
+
 ## License
 
 MIT License Copyright (c) 2017 Abdulla Faraz.
