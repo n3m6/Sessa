@@ -1,4 +1,4 @@
-const keys = require('keys.js'); // eslint-disable-line
+const keys = require('./keys.js'); // eslint-disable-line
 
 const config = {};
 const testnet = true; // change this to false when in production
