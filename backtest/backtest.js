@@ -12,6 +12,8 @@ const bb = require('./bband.js');
 const bbem = require('./bbandema.js');
 const bbt = require('./bbandtrail.js');
 const tr = require('./truerange.js');
+const dmal = require('./doublemalong.js');
+const dmas = require('./doublemashort.js');
 
 /*
 To run: node backtest.js [arguments]
@@ -35,6 +37,8 @@ function helpfile() {
   --bbandema | -bbem          (Bollinger Bands w/ EMA - Mean reversion towards trend)
   --bbandtrail | -bbt         (Bollinger Bands w/ trailing stop, reversion towards trend)
   --truerange | -tr           (Trend trade with True Range)
+  --doublema-long | -dmal     (Double moving average - long only)
+  --doublema-short | -dmas    (Double moving average - short only)
 
   --all | -a
   Calculate results for all strategies avaialable.
@@ -63,6 +67,8 @@ function callall(response, balance) {
   bbem.main(response, balance);
   bbt.main(response, balance);
   tr.main(response, balance);
+  dmal.main(response, balance);
+  dmas.main(response, balance);
 }
 
 db
@@ -146,6 +152,18 @@ db
           break;
         case '-tr':
           tr.main(response, balance);
+          break;
+        case '--doublema-long':
+          dmal.main(response, balance);
+          break;
+        case '-dmal':
+          dmal.main(response, balance);
+          break;
+        case '--doublema-short':
+          dmas.main(response, balance);
+          break;
+        case '-dmas':
+          dmas.main(response, balance);
           break;
         case '-h':
           helpfile();
