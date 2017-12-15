@@ -110,6 +110,7 @@ PositionMonitor.prototype.monitor = function monitor(data) {
     }
     */
 
+    // Check whether position was deleveraged
     if (posState === 'Deleverage') {
       db
         .setActiveTrade('false')
@@ -119,6 +120,8 @@ PositionMonitor.prototype.monitor = function monitor(data) {
       // LOG
       orderlog.deleveraged(liquidationPrice);
     }
+
+    // check whether position was liquidated
     if (posState === 'Liquidation') {
       db
         .setActiveTrade('false')

@@ -20,10 +20,13 @@ const StratEnum = {
   Go short when fast ma is below slow ma.
   */
   DOUBLEMA: 'doubleMA',
+  DOUBLEMALONG: 'doubleMALong', // same as above but only takes longs
+  DOUBLEMASHORT: 'doubleMAShort', // same as above but only takes shorts
 };
 
 // CHANGE THIS VALUE TO CHANGE STRAT
-const defaultstrat = StratEnum.DOUBLEMA;
+const defaultstrat = StratEnum.DOUBLEMALONG;
+// By default using LONG only because bitcoin is in a bubble :^)
 
 const strats = [];
 strats.threeGreen = [];
@@ -94,6 +97,56 @@ strats.doubleMA.enter = function doubleMAEnter(args) {
 };
 
 strats.doubleMA.exit = function doubleMAExit(args) {
+  const { sma1, sma2, orderType } = args;
+
+  if (orderType === 'LONG') {
+    if (sma2 > sma1) return true;
+    return false;
+  }
+  if (orderType === 'SHORT') {
+    if (sma1 > sma2) return true;
+    return false;
+  }
+  return false;
+};
+
+// long only
+strats.doubleMALong = [];
+
+strats.doubleMALong.enter = function doubleMALongEnter(args) {
+  const { sma1, sma2 } = args;
+
+  if (sma1 > sma2) return [true, 'LONG'];
+  // if (sma2 > sma1) return [true, 'SHORT'];
+  return [false, ''];
+};
+
+strats.doubleMALong.exit = function doubleMALongExit(args) {
+  const { sma1, sma2, orderType } = args;
+
+  if (orderType === 'LONG') {
+    if (sma2 > sma1) return true;
+    return false;
+  }
+  if (orderType === 'SHORT') {
+    if (sma1 > sma2) return true;
+    return false;
+  }
+  return false;
+};
+
+// short only
+strats.doubleMAShort = [];
+
+strats.doubleMAShort.enter = function doubleMAShortEnter(args) {
+  const { sma1, sma2 } = args;
+
+  // if (sma1 > sma2) return [true, 'LONG'];
+  if (sma2 > sma1) return [true, 'SHORT'];
+  return [false, ''];
+};
+
+strats.doubleMAShort.exit = function doubleMAShortExit(args) {
   const { sma1, sma2, orderType } = args;
 
   if (orderType === 'LONG') {

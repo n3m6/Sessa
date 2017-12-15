@@ -6,6 +6,8 @@ const orderlog = require('./orderlog').OrderLog;
 const Trade = function Trade() {};
 
 function determineOrderAttributes(price, atr, orderType, balance) {
+  // I wrote this portion when I was high, I'm not sure how it works, but it works
+
   // const toXBT = balance / 100000000;
   // const dollarValue = price * toXBT;
   // const bet = Math.round(dollarValue * config.margin * config.betSize);
