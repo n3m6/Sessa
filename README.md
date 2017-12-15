@@ -5,13 +5,20 @@ A cryptocurrency trader bot (only works on BitMex right now).
 ## Installation
 
 requires a redis db.
+
 add redis db details to config.js
+
 npm install the modules in package.json dependencies.
+
 When in production change config.js key 'testnet' to false
+
 Create a keys.js file
 
+
 Not ideal, but this is how you change strategy and timeframe
+
 Strategy can be changed in the strategy.js file
+
 Time frame can be changed in the main.js file
 
 # keys.js
@@ -30,7 +37,9 @@ module.exports = keys;
 ## Running
 
 run delta/delta.js to start collecting data
+
 run main.js for trading.
+
 
 alternatively just run start-sessa (requires forever to be installed)
 
