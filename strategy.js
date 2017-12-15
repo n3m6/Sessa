@@ -25,7 +25,8 @@ const StratEnum = {
 };
 
 // CHANGE THIS VALUE TO CHANGE STRAT
-const defaultstrat = StratEnum.DOUBLEMA;
+const defaultstrat = StratEnum.DOUBLEMALONG;
+// By default using LONG only because bitcoin is in a bubble :^)
 
 const strats = [];
 strats.threeGreen = [];
