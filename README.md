@@ -1,6 +1,6 @@
 ## Synopsis
 
-A trader bot (currently only handles cryptocurrencies on BitMex).
+A cryptocurrency trader bot (only works on BitMex right now).
 
 ## Installation
 
